@@ -1,0 +1,43 @@
+name: flutter_deep_learning_demo
+description: A Flutter Android app scaffold for TensorFlow Lite demos.
+version: 0.1.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^2.5.1
+  google_fonts: ^6.1.0
+  image: ^4.1.7
+  image_picker: ^1.0.7
+  camera: ^0.11.0+2
+  path_provider: ^2.1.2
+  tflite_flutter: ^0.12.1
+  shared_preferences: ^2.2.2
+  intl: ^0.20.0
+
+flutter:
+  generate: true
+  uses-material-design: true
+  assets:
+    - assets/models/
+    - assets/images/
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.2
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/app_icon.png"

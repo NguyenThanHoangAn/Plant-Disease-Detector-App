@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
+import 'plant_diseases_list_page.dart';
 
 class SupportedPlantsPage extends StatelessWidget {
   const SupportedPlantsPage({super.key});
@@ -130,7 +131,7 @@ class SupportedPlantsPage extends StatelessWidget {
                           emoji: '🍅',
                           nameKey: 'tomato',
                           scientificName: 'Solanum lycopersicum',
-                          diseaseCount: 6,
+                          diseaseCount: 10,
                         ),
                         _PlantCard(
                           emoji: '🍇',
@@ -319,90 +320,112 @@ class _PlantCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                emoji,
-                style: const TextStyle(fontSize: 32),
-              ),
-              if (isComingSoon)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    l10n.soon,
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF92400E),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isComingSoon 
+              ? null 
+              : () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PlantDiseasesListPage(
+                        plantKey: nameKey,
+                        plantName: _getLocalizedName(l10n),
+                      ),
                     ),
-                  ),
-                ),
-            ],
-          ),
-          const Spacer(),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                _getLocalizedName(l10n),
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: isComingSoon ? const Color(0xFF9CA3AF) : const Color(0xFF111827),
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                scientificName,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontStyle: FontStyle.italic,
-                  color: isComingSoon ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              if (!isComingSoon)
+                  );
+                },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF22C55E).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Icon(
-                        Icons.medical_services,
-                        size: 12,
-                        color: Color(0xFF16A34A),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
                     Text(
-                      '$diseaseCount ${l10n.diseasesCount}',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF16A34A),
-                      ),
+                      emoji,
+                      style: const TextStyle(fontSize: 32),
                     ),
+                    if (isComingSoon)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF3C7),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          l10n.soon,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF92400E),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
-            ],
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _getLocalizedName(l10n),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isComingSoon ? const Color(0xFF9CA3AF) : const Color(0xFF111827),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      scientificName,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontStyle: FontStyle.italic,
+                        color: isComingSoon ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    if (!isComingSoon)
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF22C55E).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Icon(
+                              Icons.medical_services,
+                              size: 12,
+                              color: Color(0xFF16A34A),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '$diseaseCount ${l10n.diseasesCount}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF16A34A),
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }

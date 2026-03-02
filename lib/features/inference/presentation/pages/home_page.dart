@@ -7,6 +7,7 @@ import '../../../../l10n/app_localizations.dart';
 
 import '../../application/inference_notifier.dart';
 import '../../domain/models/inference_result.dart';
+import '../../domain/models/verification_result.dart';
 import '../widgets/language_switcher.dart';
 import 'camera_capture_page.dart';
 import 'camera_preview_page.dart';
@@ -134,6 +135,110 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
     }
   }
 
+  /// 🚨 Hiển thị dialog lỗi verification
+  void _showVerificationErrorDialog(BuildContext context, VerificationResult result, AppLocalizations l10n) {
+    String title;
+    String message;
+    IconData icon;
+    Color iconColor;
+
+    switch (result.error) {
+      case VerificationError.poorQuality:
+        title = l10n.poorImageQuality;
+        message = l10n.poorImageQualityDesc;
+        icon = Icons.blur_on;
+        iconColor = Colors.orange;
+        break;
+      case VerificationError.lowConfidence:
+        title = l10n.lowConfidence;
+        message = l10n.lowConfidenceDesc;
+        icon = Icons.error_outline;
+        iconColor = Colors.amber;
+        break;
+      case VerificationError.outOfScope:
+        title = l10n.imageOutOfScope;
+        message = l10n.imageOutOfScopeDesc;
+        icon = Icons.cancel;
+        iconColor = Colors.red;
+        break;
+      default:
+        title = l10n.verificationFailed;
+        message = result.message ?? l10n.errorOccurred;
+        icon = Icons.warning;
+        iconColor = Colors.red;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(icon, color: iconColor, size: 28),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: iconColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              message.replaceAll('\\n', '\n'), // Convert \\n to actual newline
+              style: const TextStyle(fontSize: 14, height: 1.5),
+            ),
+            if (result.imageQualityScore != null) ...[
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.assessment, size: 20, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${l10n.imageQualityScore}: ${result.imageQualityScore!.toStringAsFixed(0)}/100',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Reset state để user có thể thử lại
+              setState(() {
+                _selectedImage = null;
+              });
+            },
+            child: Text(
+              l10n.retryWithBetterImage,
+              style: TextStyle(
+                color: Theme.of(context).primaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
@@ -141,14 +246,18 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
     // 👁️ WATCH inference state để tự động cập nhật UI
     final inferenceState = ref.watch(inferenceProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
-    // 🎯 Nếu inference xong và có kết quả → Auto navigate
+    // 🎯 Nếu inference xong và có kết quả → Auto navigate hoặc hiển thị lỗi
     ref.listen(inferenceProvider, (previous, next) {
       next.when(
-        data: (results) {
-          if (results.isNotEmpty && mounted && _selectedImage != null) {
-            final top1 = results.first;
-            print('✅ [HomePage] Inference xong! Kết quả: ${top1.label} (${top1.confidence * 100}%)');
+        data: (verificationResult) {
+          if (verificationResult == null) return;
+          
+          // ✅ PASS: Navigate sang ResultDetailPage
+          if (verificationResult.isPassed && verificationResult.predictions.isNotEmpty && mounted && _selectedImage != null) {
+            final top1 = verificationResult.predictions.first;
+            print('✅ [HomePage] Verification pass! Kết quả: ${top1.label} (${top1.confidence * 100}%)');
             
             // 🔄 NAVIGATE sang ResultDetailPage
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -161,6 +270,16 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
               }
             });
           }
+          // ❌ FAIL: Hiển thị dialog lỗi verification
+          else if (!verificationResult.isPassed && mounted) {
+            print('❌ [HomePage] Verification failed: ${verificationResult.error}');
+            
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                _showVerificationErrorDialog(context, verificationResult, l10n);
+              }
+            });
+          }
         },
         loading: () {
           print('⏳ [HomePage] Đang phân tích ảnh...');
@@ -168,7 +287,6 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
         error: (error, stackTrace) {
           print('❌ [HomePage] Inference thất bại: $error');
           if (mounted) {
-            final l10n = AppLocalizations.of(context)!;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('${l10n.analysisError}: $error'),
@@ -200,7 +318,7 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
     );
   }
 
-  Widget _buildHomeTab(ThemeData theme, AsyncValue<List<InferenceResult>> inferenceState) {
+  Widget _buildHomeTab(ThemeData theme, AsyncValue<VerificationResult?> inferenceState) {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(

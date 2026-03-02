@@ -33,6 +33,13 @@
   "causes": "Causes",
   "prevention": "Prevention",
   "treatment": "Treatment",
+  "diseasesDetected": "Diseases Detected",
+  "diseasesList": "Diseases List",
+  "diseasesCount": "diseases",
+  "organicTreatment": "Organic Treatment",
+  "chemicalTreatment": "Chemical Treatment",
+  "culturalPractices": "Cultural Practices",
+  "maintenanceTips": "Maintenance Tips",
 
   "historyTitle": "Detection History",
   "noHistory": "No detection history",
@@ -98,9 +105,18 @@
   "analysisError": "Analysis failed",
   
   "detectionAccuracy": "Detection Accuracy",
+  
+  "verificationFailed": "Verification Failed",
+  "imageOutOfScope": "Not in supported categories",
+  "imageOutOfScopeDesc": "This image does not belong to any supported plant categories. Please take a photo of tomato, potato, grape, apple, or corn leaves.",
+  "lowConfidence": "Low confidence",
+  "lowConfidenceDesc": "The AI model is not confident enough about this prediction. Please try:\n• Taking a clearer photo\n• Better lighting\n• Closer to the leaf",
+  "poorImageQuality": "Poor image quality",
+  "poorImageQualityDesc": "The image is too blurry or unclear. Please:\n• Hold the camera steady\n• Ensure good lighting\n• Focus on the leaf",
+  "imageQualityScore": "Image Quality",
+  "retryWithBetterImage": "Try Again with Better Image",
   "highConfidence": "High Confidence",
   "mediumConfidence": "Medium Confidence",
-  "lowConfidence": "Low Confidence",
   
   "keyFeatures": "Key Features",
   "autoPlantRecognition": "Auto plant recognition",

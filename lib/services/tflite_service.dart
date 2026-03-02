@@ -8,6 +8,8 @@ import 'package:tflite_flutter/tflite_flutter.dart' as tflite;
 
 import '../core/config/app_config.dart';
 import '../features/inference/domain/models/inference_result.dart';
+import '../features/inference/domain/models/verification_result.dart';
+import 'image_quality_service.dart';
 
 // Platform check helpers
 bool get _isAndroid => Platform.isAndroid;
@@ -22,6 +24,7 @@ class TFLiteService {
   tflite.Interpreter? _interpreter;
   List<String> _labels = const [];
   bool _useAndroidMock = false;
+  final ImageQualityService _qualityService = ImageQualityService();
   
   // ImageNet normalization for EfficientNet (RGB order)
   static const List<double> _imagenetMean = [0.485, 0.456, 0.406];
@@ -320,6 +323,134 @@ class TFLiteService {
       _useAndroidMock = true;
       return _runMockInference();
     }
+  }
+
+  /// Chạy inference với đầy đủ verification checks
+  /// 
+  /// Các bước kiểm tra:
+  /// 1. Kiểm tra chất lượng ảnh (blur detection)
+  /// 2. Chạy inference
+  /// 3. Kiểm tra confidence threshold (>= 60%)
+  /// 4. Kiểm tra out-of-scope detection (entropy-based)
+  Future<VerificationResult> runWithVerification(File imageFile) async {
+    print('🔒 [TFLiteService] Bắt đầu inference với verification');
+    
+    // ✅ BƯỚC 1: Kiểm tra chất lượng ảnh
+    print('🔍 [Verification] Kiểm tra chất lượng ảnh...');
+    final qualityResult = await _qualityService.checkImageQuality(imageFile);
+    
+    if (!qualityResult.isGoodQuality) {
+      print('❌ [Verification] Ảnh không đạt chất lượng: ${qualityResult.reason}');
+      return VerificationResult.failed(
+        error: VerificationError.poorQuality,
+        message: qualityResult.reason,
+        imageQualityScore: qualityResult.blurScore,
+      );
+    }
+    
+    print('✅ [Verification] Chất lượng ảnh OK (score: ${qualityResult.blurScore.toStringAsFixed(1)})');
+    
+    // ✅ BƯỚC 2: Chạy inference
+    print('🧠 [Verification] Chạy inference...');
+    final predictions = await run(imageFile);
+    
+    if (predictions.isEmpty) {
+      print('❌ [Verification] Không có kết quả dự đoán');
+      return VerificationResult.failed(
+        error: VerificationError.outOfScope,
+        message: 'Không thể phân tích ảnh',
+        imageQualityScore: qualityResult.blurScore,
+      );
+    }
+    
+    final topResult = predictions.first;
+    print('🏆 [Verification] Top prediction: ${topResult.label} (${(topResult.confidence * 100).toStringAsFixed(1)}%)');
+    
+    // ✅ BƯỚC 3: Kiểm tra confidence threshold
+    const confidenceThreshold = 0.60; // 60%
+    
+    if (topResult.confidence < confidenceThreshold) {
+      print('⚠️  [Verification] Confidence thấp: ${(topResult.confidence * 100).toStringAsFixed(1)}% < ${(confidenceThreshold * 100).toInt()}%');
+      return VerificationResult.failed(
+        error: VerificationError.lowConfidence,
+        message: 'Độ tin cậy: ${(topResult.confidence * 100).toStringAsFixed(1)}%',
+        imageQualityScore: qualityResult.blurScore,
+      );
+    }
+    
+    // ✅ BƯỚC 4: Kiểm tra out-of-scope (OOD detection)
+    // Sử dụng entropy và max probability để phát hiện ảnh ngoài phạm vi
+    final isOutOfScope = _detectOutOfScope(predictions);
+    
+    if (isOutOfScope) {
+      print('❌ [Verification] Ảnh ngoài phạm vi hỗ trợ');
+      return VerificationResult.failed(
+        error: VerificationError.outOfScope,
+        message: 'Không thuộc danh mục cây được hỗ trợ',
+        imageQualityScore: qualityResult.blurScore,
+      );
+    }
+    
+    // ✅ Tất cả checks đều pass
+    print('✅ [Verification] Tất cả checks đều pass!');
+    return VerificationResult.passed(
+      predictions: predictions,
+      imageQualityScore: qualityResult.blurScore,
+    );
+  }
+
+  /// Phát hiện ảnh ngoài phạm vi sử dụng entropy-based OOD detection
+  /// 
+  /// Logic:
+  /// - Nếu entropy cao + max prob thấp → likely out-of-scope
+  /// - Nếu prediction phân bố đều → không thuộc class nào rõ ràng
+  bool _detectOutOfScope(List<InferenceResult> predictions) {
+    if (predictions.isEmpty) return true;
+    
+    final topResult = predictions.first;
+    
+    // Threshold 1: Max probability quá thấp
+    // Nếu prediction tốt nhất < 40% → có thể OOD
+    const maxProbThresholdLow = 0.40;
+    if (topResult.confidence < maxProbThresholdLow) {
+      print('   🔍 OOD: Max prob quá thấp (${(topResult.confidence * 100).toStringAsFixed(1)}%)');
+      return true;
+    }
+    
+    // Threshold 2: Entropy cao (phân bố đều giữa các classes)
+    // Entropy = -Σ(p * log(p))
+    double entropy = 0;
+    for (final pred in predictions) {
+      if (pred.confidence > 0) {
+        entropy -= pred.confidence * math.log(pred.confidence) / math.ln2;
+      }
+    }
+    
+    // Normalize entropy về 0-1 (max entropy = log2(n))
+    final maxEntropy = math.log(predictions.length) / math.ln2;
+    final normalizedEntropy = entropy / maxEntropy;
+    
+    print('   🔍 OOD check: entropy=${normalizedEntropy.toStringAsFixed(3)}, maxProb=${(topResult.confidence * 100).toStringAsFixed(1)}%');
+    
+    // Nếu entropy > 0.8 (phân bố gần như đều) → likely OOD
+    const entropyThreshold = 0.80;
+    if (normalizedEntropy > entropyThreshold) {
+      print('   🔍 OOD: Entropy cao (${normalizedEntropy.toStringAsFixed(3)})');
+      return true;
+    }
+    
+    // Threshold 3: Gap giữa top-1 và top-2 quá nhỏ
+    if (predictions.length >= 2) {
+      final gap = topResult.confidence - predictions[1].confidence;
+      const minGap = 0.10; // Cần chênh lệch ít nhất 10%
+      
+      if (gap < minGap) {
+        print('   🔍 OOD: Gap giữa top-1 và top-2 quá nhỏ (${(gap * 100).toStringAsFixed(1)}%)');
+        return true;
+      }
+    }
+    
+    return false;
   }
 
   List<InferenceResult> _runMockInference() {

@@ -248,6 +248,48 @@ abstract class AppLocalizations {
   /// **'Treatment'**
   String get treatment;
 
+  /// No description provided for @diseasesDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Diseases Detected'**
+  String get diseasesDetected;
+
+  /// No description provided for @diseasesList.
+  ///
+  /// In en, this message translates to:
+  /// **'Diseases List'**
+  String get diseasesList;
+
+  /// No description provided for @diseasesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'diseases'**
+  String get diseasesCount;
+
+  /// No description provided for @organicTreatment.
+  ///
+  /// In en, this message translates to:
+  /// **'Organic Treatment'**
+  String get organicTreatment;
+
+  /// No description provided for @chemicalTreatment.
+  ///
+  /// In en, this message translates to:
+  /// **'Chemical Treatment'**
+  String get chemicalTreatment;
+
+  /// No description provided for @culturalPractices.
+  ///
+  /// In en, this message translates to:
+  /// **'Cultural Practices:'**
+  String get culturalPractices;
+
+  /// No description provided for @maintenanceTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance Tips'**
+  String get maintenanceTips;
+
   /// No description provided for @historyTitle.
   ///
   /// In en, this message translates to:
@@ -548,6 +590,60 @@ abstract class AppLocalizations {
   /// **'Detection Accuracy'**
   String get detectionAccuracy;
 
+  /// No description provided for @verificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Failed'**
+  String get verificationFailed;
+
+  /// No description provided for @imageOutOfScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in supported categories'**
+  String get imageOutOfScope;
+
+  /// No description provided for @imageOutOfScopeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This image does not belong to any supported plant categories. Please take a photo of tomato, potato, grape, apple, or corn leaves.'**
+  String get imageOutOfScopeDesc;
+
+  /// No description provided for @lowConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Low confidence'**
+  String get lowConfidence;
+
+  /// No description provided for @lowConfidenceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI model is not confident enough about this prediction. Please try:\n• Taking a clearer photo\n• Better lighting\n• Closer to the leaf'**
+  String get lowConfidenceDesc;
+
+  /// No description provided for @poorImageQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Poor image quality'**
+  String get poorImageQuality;
+
+  /// No description provided for @poorImageQualityDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The image is too blurry or unclear. Please:\n• Hold the camera steady\n• Ensure good lighting\n• Focus on the leaf'**
+  String get poorImageQualityDesc;
+
+  /// No description provided for @imageQualityScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Image Quality'**
+  String get imageQualityScore;
+
+  /// No description provided for @retryWithBetterImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again with Better Image'**
+  String get retryWithBetterImage;
+
   /// No description provided for @highConfidence.
   ///
   /// In en, this message translates to:
@@ -559,12 +655,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Medium Confidence'**
   String get mediumConfidence;
-
-  /// No description provided for @lowConfidence.
-  ///
-  /// In en, this message translates to:
-  /// **'Low Confidence'**
-  String get lowConfidence;
 
   /// No description provided for @keyFeatures.
   ///
@@ -1172,12 +1262,6 @@ abstract class AppLocalizations {
   /// **'Chemical Options:'**
   String get chemicalOptions;
 
-  /// No description provided for @culturalPractices.
-  ///
-  /// In en, this message translates to:
-  /// **'Cultural Practices:'**
-  String get culturalPractices;
-
   /// No description provided for @dataDriven.
   ///
   /// In en, this message translates to:
@@ -1261,12 +1345,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Soon'**
   String get soon;
-
-  /// No description provided for @diseasesCount.
-  ///
-  /// In en, this message translates to:
-  /// **'diseases'**
-  String get diseasesCount;
 
   /// No description provided for @cnnAndDeepLearning.
   ///

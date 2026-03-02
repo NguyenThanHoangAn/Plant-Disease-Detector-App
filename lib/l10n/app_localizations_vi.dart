@@ -85,6 +85,27 @@ class AppLocalizationsVi extends AppLocalizations {
   String get treatment => 'Điều trị';
 
   @override
+  String get diseasesDetected => 'Bệnh được phát hiện';
+
+  @override
+  String get diseasesList => 'Danh sách bệnh';
+
+  @override
+  String get diseasesCount => 'bệnh';
+
+  @override
+  String get organicTreatment => 'Điều trị hữu cơ';
+
+  @override
+  String get chemicalTreatment => 'Điều trị hóa học';
+
+  @override
+  String get culturalPractices => 'Thực hành canh tác:';
+
+  @override
+  String get maintenanceTips => 'Lời khuyên chăm sóc';
+
+  @override
   String get historyTitle => 'Lịch sử phát hiện';
 
   @override
@@ -237,13 +258,40 @@ class AppLocalizationsVi extends AppLocalizations {
   String get detectionAccuracy => 'Độ chính xác';
 
   @override
+  String get verificationFailed => 'Xác thực thất bại';
+
+  @override
+  String get imageOutOfScope => 'Không thuộc danh mục hỗ trợ';
+
+  @override
+  String get imageOutOfScopeDesc =>
+      'Ảnh này không thuộc bất kỳ loại cây nào được hỗ trợ. Vui lòng chụp ảnh lá cà chua, khoai tây, nho, táo hoặc ngô.';
+
+  @override
+  String get lowConfidence => 'Không đủ độ tin cậy';
+
+  @override
+  String get lowConfidenceDesc =>
+      'Mô hình AI chưa đủ tin cậy về dự đoán này. Vui lòng thử:\n• Chụp ảnh rõ nét hơn\n• Ánh sáng tốt hơn\n• Gần lá cây hơn';
+
+  @override
+  String get poorImageQuality => 'Ảnh không đạt chất lượng';
+
+  @override
+  String get poorImageQualityDesc =>
+      'Ảnh quá mờ hoặc không rõ ràng. Vui lòng:\n• Giữ camera ổn định\n• Đảm bảo ánh sáng đầy đủ\n• Lấy nét vào lá cây';
+
+  @override
+  String get imageQualityScore => 'Chất lượng ảnh';
+
+  @override
+  String get retryWithBetterImage => 'Thử lại với ảnh tốt hơn';
+
+  @override
   String get highConfidence => 'Độ tin cậy cao';
 
   @override
   String get mediumConfidence => 'Độ tin cậy trung bình';
-
-  @override
-  String get lowConfidence => 'Độ tin cậy thấp';
 
   @override
   String get keyFeatures => 'Tính năng chính';
@@ -562,9 +610,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get chemicalOptions => 'Phương pháp hóa học:';
 
   @override
-  String get culturalPractices => 'Thực hành canh tác:';
-
-  @override
   String get dataDriven => 'Dữ liệu định hướng';
 
   @override
@@ -609,9 +654,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get soon => 'Sớm';
-
-  @override
-  String get diseasesCount => 'bệnh';
 
   @override
   String get cnnAndDeepLearning => 'CNN & Học sâu';

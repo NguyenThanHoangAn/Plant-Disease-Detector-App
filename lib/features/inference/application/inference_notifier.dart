@@ -6,9 +6,10 @@ import 'package:intl/intl.dart';
 import '../../../services/history_service.dart';
 import '../../../services/tflite_service.dart';
 import '../domain/models/inference_result.dart';
+import '../domain/models/verification_result.dart';
 import '../presentation/pages/history_page.dart';
 
-final inferenceProvider = StateNotifierProvider<InferenceNotifier, AsyncValue<List<InferenceResult>>>(
+final inferenceProvider = StateNotifierProvider<InferenceNotifier, AsyncValue<VerificationResult?>>(
   (ref) => InferenceNotifier(
     ref.read(tfliteServiceProvider),
     ref.read(historyServiceProvider),
@@ -16,8 +17,8 @@ final inferenceProvider = StateNotifierProvider<InferenceNotifier, AsyncValue<Li
   ),
 );
 
-class InferenceNotifier extends StateNotifier<AsyncValue<List<InferenceResult>>> {
-  InferenceNotifier(this._service, this._historyService, this._ref) : super(const AsyncValue.data([]));
+class InferenceNotifier extends StateNotifier<AsyncValue<VerificationResult?>> {
+  InferenceNotifier(this._service, this._historyService, this._ref) : super(const AsyncValue.data(null));
 
   final TFLiteService _service;
   final HistoryService _historyService;
@@ -31,27 +32,34 @@ class InferenceNotifier extends StateNotifier<AsyncValue<List<InferenceResult>>>
       return;
     }
 
-    print('📊 [InferenceNotifier] Bắt đầu inference');
+    print('📊 [InferenceNotifier] Bắt đầu inference với verification');
     print('   📁 Ảnh: ${image.path}');
     print('   📏 Kích thước: ${image.lengthSync()} bytes');
 
     state = const AsyncValue.loading();
     try {
-      // ✅ BƯỚC 2: Chạy inference
-      print('🧠 [InferenceNotifier] Chạy model TFLite...');
-      final results = await _service.run(image);
+      // ✅ BƯỚC 2: Chạy inference với verification
+      print('🔒 [InferenceNotifier] Chạy model với đầy đủ verification...');
+      final verificationResult = await _service.runWithVerification(image);
       
-      print('✅ [InferenceNotifier] Inference xong!');
-      print('   🏆 Top kết quả:');
-      for (var i = 0; i < 3 && i < results.length; i++) {
-        print('      [$i] ${results[i].label} - ${(results[i].confidence * 100).toStringAsFixed(1)}%');
+      print('✅ [InferenceNotifier] Verification xong!');
+      print('   🔍 Kết quả: ${verificationResult.isPassed ? "✅ PASS" : "❌ FAIL (${verificationResult.error})"}');
+      
+      if (verificationResult.isPassed && verificationResult.predictions.isNotEmpty) {
+        print('   🏆 Top kết quả:');
+        for (var i = 0; i < 3 && i < verificationResult.predictions.length; i++) {
+          final pred = verificationResult.predictions[i];
+          print('      [$i] ${pred.label} - ${(pred.confidence * 100).toStringAsFixed(1)}%');
+        }
+      } else {
+        print('   ⚠️  Lý do: ${verificationResult.message}');
       }
 
-      state = AsyncValue.data(results);
+      state = AsyncValue.data(verificationResult);
 
-      // ✅ BƯỚC 3: Lưu vào history
-      if (results.isNotEmpty) {
-        final topResult = results.first;
+      // ✅ BƯỚC 3: Lưu vào history (chỉ khi pass verification)
+      if (verificationResult.isPassed && verificationResult.predictions.isNotEmpty) {
+        final topResult = verificationResult.predictions.first;
         final now = DateTime.now();
         final dateFormat = DateFormat('yyyy-MM-dd');
         final timeFormat = DateFormat('hh:mm a');
@@ -72,6 +80,8 @@ class InferenceNotifier extends StateNotifier<AsyncValue<List<InferenceResult>>>
         // ✅ BƯỚC 4: Refresh history provider
         _ref.read(historyProvider.notifier).refresh();
         print('🔄 [InferenceNotifier] Đã refresh history view');
+      } else {
+        print('⚠️  [InferenceNotifier] Không lưu history (verification failed)');
       }
     } catch (e, st) {
       print('❌ [InferenceNotifier] Lỗi inference: $e');

@@ -33,6 +33,13 @@
   "causes": "Nguyên nhân",
   "prevention": "Phòng ngừa",
   "treatment": "Điều trị",
+  "diseasesDetected": "Bệnh được phát hiện",
+  "diseasesList": "Danh sách bệnh",
+  "diseasesCount": "bệnh",
+  "organicTreatment": "Điều trị hữu cơ",
+  "chemicalTreatment": "Điều trị hóa học",
+  "culturalPractices": "Biện pháp canh tác",
+  "maintenanceTips": "Lời khuyên chăm sóc",
 
   "historyTitle": "Lịch sử phát hiện",
   "noHistory": "Chưa có lịch sử phát hiện",
@@ -98,9 +105,18 @@
   "analysisError": "Phân tích thất bại",
   
   "detectionAccuracy": "Độ chính xác",
+  
+  "verificationFailed": "Xác thực thất bại",
+  "imageOutOfScope": "Không thuộc danh mục hỗ trợ",
+  "imageOutOfScopeDesc": "Ảnh này không thuộc bất kỳ loại cây nào được hỗ trợ. Vui lòng chụp ảnh lá cà chua, khoai tây, nho, táo hoặc ngô.",
+  "lowConfidence": "Không đủ độ tin cậy",
+  "lowConfidenceDesc": "Mô hình AI chưa đủ tin cậy về dự đoán này. Vui lòng thử:\n• Chụp ảnh rõ nét hơn\n• Ánh sáng tốt hơn\n• Gần lá cây hơn",
+  "poorImageQuality": "Ảnh không đạt chất lượng",
+  "poorImageQualityDesc": "Ảnh quá mờ hoặc không rõ ràng. Vui lòng:\n• Giữ camera ổn định\n• Đảm bảo ánh sáng đầy đủ\n• Lấy nét vào lá cây",
+  "imageQualityScore": "Chất lượng ảnh",
+  "retryWithBetterImage": "Thử lại với ảnh tốt hơn",
   "highConfidence": "Độ tin cậy cao",
   "mediumConfidence": "Độ tin cậy trung bình",
-  "lowConfidence": "Độ tin cậy thấp",
   
   "keyFeatures": "Tính năng chính",
   "autoPlantRecognition": "Nhận diện cây tự động",

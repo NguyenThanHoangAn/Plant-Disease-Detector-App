@@ -85,6 +85,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get treatment => 'Treatment';
 
   @override
+  String get diseasesDetected => 'Diseases Detected';
+
+  @override
+  String get diseasesList => 'Diseases List';
+
+  @override
+  String get diseasesCount => 'diseases';
+
+  @override
+  String get organicTreatment => 'Organic Treatment';
+
+  @override
+  String get chemicalTreatment => 'Chemical Treatment';
+
+  @override
+  String get culturalPractices => 'Cultural Practices:';
+
+  @override
+  String get maintenanceTips => 'Maintenance Tips';
+
+  @override
   String get historyTitle => 'Detection History';
 
   @override
@@ -237,13 +258,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detectionAccuracy => 'Detection Accuracy';
 
   @override
+  String get verificationFailed => 'Verification Failed';
+
+  @override
+  String get imageOutOfScope => 'Not in supported categories';
+
+  @override
+  String get imageOutOfScopeDesc =>
+      'This image does not belong to any supported plant categories. Please take a photo of tomato, potato, grape, apple, or corn leaves.';
+
+  @override
+  String get lowConfidence => 'Low confidence';
+
+  @override
+  String get lowConfidenceDesc =>
+      'The AI model is not confident enough about this prediction. Please try:\n• Taking a clearer photo\n• Better lighting\n• Closer to the leaf';
+
+  @override
+  String get poorImageQuality => 'Poor image quality';
+
+  @override
+  String get poorImageQualityDesc =>
+      'The image is too blurry or unclear. Please:\n• Hold the camera steady\n• Ensure good lighting\n• Focus on the leaf';
+
+  @override
+  String get imageQualityScore => 'Image Quality';
+
+  @override
+  String get retryWithBetterImage => 'Try Again with Better Image';
+
+  @override
   String get highConfidence => 'High Confidence';
 
   @override
   String get mediumConfidence => 'Medium Confidence';
-
-  @override
-  String get lowConfidence => 'Low Confidence';
 
   @override
   String get keyFeatures => 'Key Features';
@@ -561,9 +609,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chemicalOptions => 'Chemical Options:';
 
   @override
-  String get culturalPractices => 'Cultural Practices:';
-
-  @override
   String get dataDriven => 'Data-Driven';
 
   @override
@@ -607,9 +652,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get soon => 'Soon';
-
-  @override
-  String get diseasesCount => 'diseases';
 
   @override
   String get cnnAndDeepLearning => 'CNN & Deep Learning';

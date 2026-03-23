@@ -208,6 +208,7 @@ class TomatoInfoView extends ConsumerWidget {
                         colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
                       ),
                     ),
+                    const SizedBox(height: 12),
                     _BenefitCard(
                       icon: Icons.insights,
                       title: l10n.dataDriven,
@@ -847,6 +848,8 @@ class _BenefitCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -854,7 +857,10 @@ class _BenefitCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.white.withOpacity(0.9),
+                    height: 1.35,
                   ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -907,6 +913,8 @@ class _UserTypeCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF111827),
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -914,7 +922,10 @@ class _UserTypeCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFF6B7280),
+                    height: 1.35,
                   ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

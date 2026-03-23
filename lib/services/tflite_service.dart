@@ -330,7 +330,7 @@ class TFLiteService {
   /// Các bước kiểm tra:
   /// 1. Kiểm tra chất lượng ảnh (blur detection)
   /// 2. Chạy inference
-  /// 3. Kiểm tra confidence threshold (>= 60%)
+  /// 3. Kiểm tra confidence threshold (>= 65%)
   /// 4. Kiểm tra out-of-scope detection (entropy-based)
   Future<VerificationResult> runWithVerification(File imageFile) async {
     print('🔒 [TFLiteService] Bắt đầu inference với verification');
@@ -367,7 +367,7 @@ class TFLiteService {
     print('🏆 [Verification] Top prediction: ${topResult.label} (${(topResult.confidence * 100).toStringAsFixed(1)}%)');
     
     // ✅ BƯỚC 3: Kiểm tra confidence threshold
-    const confidenceThreshold = 0.60; // 60%
+    const confidenceThreshold = AppConfig.lowConfidenceRetakeThreshold; // 65%
     
     if (topResult.confidence < confidenceThreshold) {
       print('⚠️  [Verification] Confidence thấp: ${(topResult.confidence * 100).toStringAsFixed(1)}% < ${(confidenceThreshold * 100).toInt()}%');

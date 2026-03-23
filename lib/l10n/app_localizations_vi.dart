@@ -21,6 +21,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get info => 'Thông tin';
 
   @override
+  String get account => 'Tài khoản';
+
+  @override
   String get supportedPlants => 'Cây được hỗ trợ';
 
   @override
@@ -169,6 +172,59 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get english => 'Tiếng Anh';
+
+  @override
+  String get loginToContinue => 'Đăng nhập để tiếp tục sử dụng ứng dụng';
+
+  @override
+  String get signInWithGoogle => 'Đăng nhập với Google';
+
+  @override
+  String get signingIn => 'Đang đăng nhập...';
+
+  @override
+  String get continueWithoutLogin => 'Vào app luôn';
+
+  @override
+  String get loginCancelled =>
+      'Bạn đã hủy đăng nhập. Có thể vào app luôn để tiếp tục.';
+
+  @override
+  String get loginFailed => 'Đăng nhập thất bại';
+
+  @override
+  String get notLoggedInTitle => 'Bạn chưa đăng nhập';
+
+  @override
+  String get signInToViewAccount =>
+      'Đăng nhập Google để xem thông tin tài khoản của bạn.';
+
+  @override
+  String get accountLoadFailed => 'Không tải được thông tin tài khoản.';
+
+  @override
+  String get accountInfoTitle => 'Thông tin tài khoản';
+
+  @override
+  String get nameLabel => 'Tên';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get noDisplayName => 'Chưa có tên hiển thị';
+
+  @override
+  String get noEmail => 'Chưa có email';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get loggingOut => 'Đang logout...';
+
+  @override
+  String get logoutFailed => 'Logout thất bại';
 
   @override
   String get aboutApp => 'Về ứng dụng';

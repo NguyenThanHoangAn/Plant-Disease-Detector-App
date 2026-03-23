@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'home_page.dart';
+import 'auth_gate_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -18,7 +18,7 @@ class _SplashPageState extends State<SplashPage> {
     Timer(const Duration(milliseconds: 1500), () {
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const DeepLearningHomePage()),
+        MaterialPageRoute(builder: (_) => const AuthGatePage()),
       );
     });
   }
@@ -64,4 +64,3 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 }
-

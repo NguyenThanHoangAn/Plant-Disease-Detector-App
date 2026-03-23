@@ -19,4 +19,7 @@ class AppConfig {
   /// Post-processing: threshold for accepting prediction, and top-K to return
   static const double confidenceThreshold = 0.10; // Giảm threshold để nhận diện linh hoạt hơn
   static const int topK = 3; // Hiển thị top 3 kết quả
+
+  /// Verification threshold: only ask user to retake if confidence is below this value
+  static const double lowConfidenceRetakeThreshold = 0.65; // 65%
 }

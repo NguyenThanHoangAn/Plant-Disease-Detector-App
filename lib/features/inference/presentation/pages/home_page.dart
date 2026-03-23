@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/providers/auth_providers.dart';
 import '../../../../l10n/app_localizations.dart';
 
 import '../../application/inference_notifier.dart';
@@ -11,10 +12,12 @@ import '../../domain/models/verification_result.dart';
 import '../widgets/language_switcher.dart';
 import 'camera_capture_page.dart';
 import 'camera_preview_page.dart';
+import 'google_login_page.dart';
 import 'history_page.dart';
 import 'info_page.dart';
 import 'result_detail_page.dart';
 import 'supported_plants_page.dart';
+import 'user_profile_page.dart';
 
 class DeepLearningHomePage extends ConsumerStatefulWidget {
   const DeepLearningHomePage({super.key});
@@ -308,6 +311,7 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
           const TomatoHistoryView(),
           const SupportedPlantsPage(),
           const TomatoInfoView(),
+          const _AccountTab(),
         ],
       ),
       bottomNavigationBar: _BottomNav(
@@ -1361,7 +1365,7 @@ class _BottomNav extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -1373,33 +1377,117 @@ class _BottomNav extends StatelessWidget {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _NavItem(
-            icon: Icons.home_rounded,
-            label: l10n.home,
-            isActive: currentIndex == 0,
-            onTap: () => onTap(0),
+          Expanded(
+            child: _NavItem(
+              icon: Icons.home_rounded,
+              label: l10n.home,
+              isActive: currentIndex == 0,
+              onTap: () => onTap(0),
+            ),
           ),
-          _NavItem(
-            icon: Icons.history_rounded,
-            label: l10n.history,
-            isActive: currentIndex == 1,
-            onTap: () => onTap(1),
+          Expanded(
+            child: _NavItem(
+              icon: Icons.history_rounded,
+              label: l10n.history,
+              isActive: currentIndex == 1,
+              onTap: () => onTap(1),
+            ),
           ),
-          _NavItem(
-            icon: Icons.eco_rounded,
-            label: l10n.supportedPlants,
-            isActive: currentIndex == 2,
-            onTap: () => onTap(2),
+          Expanded(
+            child: _NavItem(
+              icon: Icons.eco_rounded,
+              label: l10n.supportedPlants,
+              isActive: currentIndex == 2,
+              onTap: () => onTap(2),
+            ),
           ),
-          _NavItem(
-            icon: Icons.info_outline_rounded,
-            label: l10n.info,
-            isActive: currentIndex == 3,
-            onTap: () => onTap(3),
+          Expanded(
+            child: _NavItem(
+              icon: Icons.info_outline_rounded,
+              label: l10n.info,
+              isActive: currentIndex == 3,
+              onTap: () => onTap(3),
+            ),
+          ),
+          Expanded(
+            child: _NavItem(
+              icon: Icons.person_outline_rounded,
+              label: l10n.account,
+              isActive: currentIndex == 4,
+              onTap: () => onTap(4),
+            ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AccountTab extends ConsumerWidget {
+  const _AccountTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateChangesProvider);
+    final l10n = AppLocalizations.of(context)!;
+
+    return authState.when(
+      data: (user) {
+        if (user == null) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: SafeArea(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.account_circle_outlined, size: 72, color: Color(0xFF16A34A)),
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.notLoggedInTitle,
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.signInToViewAccount,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Color(0xFF6B7280)),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const GoogleLoginPage()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF16A34A),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(l10n.signInWithGoogle),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        return UserProfilePage(user: user);
+      },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (_, __) => Scaffold(
+        body: Center(
+          child: Text(l10n.accountLoadFailed),
+        ),
       ),
     );
   }
@@ -1425,18 +1513,24 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, color: color, size: 24),
             const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                fontSize: 12,
+            SizedBox(
+              width: double.infinity,
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                  fontSize: 11,
+                ),
               ),
             ),
           ],

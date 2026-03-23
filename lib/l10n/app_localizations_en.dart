@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get info => 'Info';
 
   @override
+  String get account => 'Account';
+
+  @override
   String get supportedPlants => 'Supported Plants';
 
   @override
@@ -169,6 +172,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get english => 'English';
+
+  @override
+  String get loginToContinue => 'Sign in to continue using the app';
+
+  @override
+  String get signInWithGoogle => 'Sign in with Google';
+
+  @override
+  String get signingIn => 'Signing in...';
+
+  @override
+  String get continueWithoutLogin => 'Continue without login';
+
+  @override
+  String get loginCancelled =>
+      'You cancelled sign-in. You can continue without login.';
+
+  @override
+  String get loginFailed => 'Sign-in failed';
+
+  @override
+  String get notLoggedInTitle => 'You are not signed in';
+
+  @override
+  String get signInToViewAccount =>
+      'Sign in with Google to view your account information.';
+
+  @override
+  String get accountLoadFailed => 'Unable to load account information.';
+
+  @override
+  String get accountInfoTitle => 'Account Information';
+
+  @override
+  String get nameLabel => 'Name';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get noDisplayName => 'No display name';
+
+  @override
+  String get noEmail => 'No email';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get loggingOut => 'Logging out...';
+
+  @override
+  String get logoutFailed => 'Logout failed';
 
   @override
   String get aboutApp => 'About App';

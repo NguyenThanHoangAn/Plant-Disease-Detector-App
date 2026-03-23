@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'Info'**
   String get info;
 
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
+
   /// No description provided for @supportedPlants.
   ///
   /// In en, this message translates to:
@@ -415,6 +421,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'English'**
   String get english;
+
+  /// No description provided for @loginToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to continue using the app'**
+  String get loginToContinue;
+
+  /// No description provided for @signInWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google'**
+  String get signInWithGoogle;
+
+  /// No description provided for @signingIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in...'**
+  String get signingIn;
+
+  /// No description provided for @continueWithoutLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue without login'**
+  String get continueWithoutLogin;
+
+  /// No description provided for @loginCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'You cancelled sign-in. You can continue without login.'**
+  String get loginCancelled;
+
+  /// No description provided for @loginFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in failed'**
+  String get loginFailed;
+
+  /// No description provided for @notLoggedInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not signed in'**
+  String get notLoggedInTitle;
+
+  /// No description provided for @signInToViewAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google to view your account information.'**
+  String get signInToViewAccount;
+
+  /// No description provided for @accountLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load account information.'**
+  String get accountLoadFailed;
+
+  /// No description provided for @accountInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Information'**
+  String get accountInfoTitle;
+
+  /// No description provided for @nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get nameLabel;
+
+  /// No description provided for @emailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailLabel;
+
+  /// No description provided for @noDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'No display name'**
+  String get noDisplayName;
+
+  /// No description provided for @noEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'No email'**
+  String get noEmail;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// No description provided for @loggingOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Logging out...'**
+  String get loggingOut;
+
+  /// No description provided for @logoutFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout failed'**
+  String get logoutFailed;
 
   /// No description provided for @aboutApp.
   ///

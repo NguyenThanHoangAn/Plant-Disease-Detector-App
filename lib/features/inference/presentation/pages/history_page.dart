@@ -41,14 +41,35 @@ class HistoryNotifier extends StateNotifier<AsyncValue<List<ScanHistoryItem>>> {
   }
 }
 
-class TomatoHistoryView extends ConsumerWidget {
+enum _HistoryStatusFilter { all, healthy, diseased }
+
+class TomatoHistoryView extends ConsumerStatefulWidget {
   const TomatoHistoryView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TomatoHistoryView> createState() => _TomatoHistoryViewState();
+}
+
+class _TomatoHistoryViewState extends ConsumerState<TomatoHistoryView> {
+  _HistoryStatusFilter _selectedFilter = _HistoryStatusFilter.all;
+
+  List<ScanHistoryItem> _applyFilter(List<ScanHistoryItem> history) {
+    switch (_selectedFilter) {
+      case _HistoryStatusFilter.healthy:
+        return history.where((item) => item.status == 'healthy').toList();
+      case _HistoryStatusFilter.diseased:
+        return history.where((item) => item.status != 'healthy').toList();
+      case _HistoryStatusFilter.all:
+        return history;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final historyAsync = ref.watch(historyProvider);
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).languageCode;
+    final allLabel = locale == 'vi' ? 'Tất cả' : 'All';
 
     return Container(
       color: const Color(0xFFF9FAFB),
@@ -120,13 +141,53 @@ class TomatoHistoryView extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   historyAsync.when(
-                    data: (history) => Text(
-                      '${history.length} ${l10n.totalScans}',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF6B7280),
-                      ),
-                    ),
+                    data: (history) {
+                      final filtered = _applyFilter(history);
+                      final countText = _selectedFilter == _HistoryStatusFilter.all
+                          ? '${history.length} ${l10n.totalScans}'
+                          : '${filtered.length}/${history.length} ${l10n.totalScans}';
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            countText,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
+                              ChoiceChip(
+                                label: Text(allLabel),
+                                selected: _selectedFilter == _HistoryStatusFilter.all,
+                                onSelected: (_) {
+                                  setState(() => _selectedFilter = _HistoryStatusFilter.all);
+                                },
+                              ),
+                              ChoiceChip(
+                                label: Text(l10n.healthy),
+                                selected: _selectedFilter == _HistoryStatusFilter.healthy,
+                                onSelected: (_) {
+                                  setState(() => _selectedFilter = _HistoryStatusFilter.healthy);
+                                },
+                              ),
+                              ChoiceChip(
+                                label: Text(l10n.diseased),
+                                selected: _selectedFilter == _HistoryStatusFilter.diseased,
+                                onSelected: (_) {
+                                  setState(() => _selectedFilter = _HistoryStatusFilter.diseased);
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
                     loading: () => Text(
                       l10n.loading,
                       style: const TextStyle(
@@ -182,15 +243,41 @@ class TomatoHistoryView extends ConsumerWidget {
                     );
                   }
 
+                  final filteredHistory = _applyFilter(history);
+
+                  if (filteredHistory.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.filter_alt_off,
+                            size: 56,
+                            color: Colors.grey[300],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            locale == 'vi' ? 'Không có kết quả phù hợp bộ lọc' : 'No results for this filter',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
                   return RefreshIndicator(
                     onRefresh: () async {
                       await ref.read(historyProvider.notifier).refresh();
                     },
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      itemCount: history.length,
+                      itemCount: filteredHistory.length,
                       itemBuilder: (context, index) {
-                        final item = history[index];
+                        final item = filteredHistory[index];
                         final isHealthy = item.status == 'healthy';
 
                         return InkWell(

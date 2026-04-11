@@ -7,8 +7,8 @@ import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart' as tflite;
 
 import '../core/config/app_config.dart';
-import '../features/inference/domain/models/inference_result.dart';
-import '../features/inference/domain/models/verification_result.dart';
+import 'package:flutter_deep_learning_demo/features/plant_disease_detection/data/models/inference_result.dart';
+import 'package:flutter_deep_learning_demo/features/plant_disease_detection/data/models/verification_result.dart';
 import 'image_quality_service.dart';
 
 // Platform check helpers
@@ -93,7 +93,7 @@ class TFLiteService {
     // Android: try to load native model with fallback
     if (_isAndroid) {
       try {
-        _interpreter = await tflite.Interpreter.fromAsset(AppConfig.modelAssetPath);
+        _interpreter = await tflite.Interpreter.fromAsset(AppConfig.MODEL_ASSET_PATH);
         await _loadLabels();
         _logModelInfo();
       } catch (e) {
@@ -107,7 +107,7 @@ class TFLiteService {
     
     // Other platforms
     try {
-      _interpreter = await tflite.Interpreter.fromAsset(AppConfig.modelAssetPath);
+      _interpreter = await tflite.Interpreter.fromAsset(AppConfig.MODEL_ASSET_PATH);
       await _loadLabels();
       _logModelInfo();
     } catch (e) {
@@ -159,7 +159,7 @@ class TFLiteService {
       print('📊 [TFLiteService] Model info:');
       print('   Input shape: $inputShape, type: $inputTypeStr');
       final modeNames = ['ImageNet RGB', 'Simple [0,1] RGB', 'ImageNet BGR', '[-1,1] RGB', 'No preprocessing (0..255)'];
-      print('   Preprocessing: ${modeNames[AppConfig.preprocessingMode]}');
+      print('   Preprocessing: ${modeNames[AppConfig.PREPROCESSING_MODE]}');
 
       // Determine layout
       final isNHWC = inputShape.length == 4 && inputShape[0] == 1 && inputShape[3] == 3;
@@ -169,12 +169,12 @@ class TFLiteService {
           ? inputShape[1]
           : isNCHW
               ? inputShape[2]
-              : AppConfig.inputSize;
+              : AppConfig.INPUT_SIZE;
       final width = isNHWC
           ? inputShape[2]
           : isNCHW
               ? inputShape[3]
-              : AppConfig.inputSize;
+              : AppConfig.INPUT_SIZE;
 
       print('   Resize to: ${width}x$height');
 
@@ -203,7 +203,7 @@ class TFLiteService {
       print('   ✅ RGB pixels extracted successfully');
 
       // Build input tensor in the expected layout
-      const mode = AppConfig.preprocessingMode;
+      const mode = AppConfig.PREPROCESSING_MODE;
       dynamic input;
       if (isNHWC) {
         // [1, H, W, C]
@@ -228,7 +228,7 @@ class TFLiteService {
         );
       } else if (isNCHW) {
         // [1, C, H, W]
-        const mode = AppConfig.preprocessingMode;
+        const mode = AppConfig.PREPROCESSING_MODE;
         input = List.generate(
           1,
           (_) => List.generate(
@@ -283,7 +283,7 @@ class TFLiteService {
           ? output[0]
           : (output as List<double>);
         print('🔍 Raw output (first 5): ${rawOut.take(math.min(5, rawOut.length)).toList()}');
-        final probs = AppConfig.outputIsSoftmax ? rawOut : _softmax(rawOut);
+        final probs = AppConfig.OUTPUT_IS_SOFTMAX ? rawOut : _softmax(rawOut);
         print('   📊 Số lượng classes: ${probs.length}');
 
       final indexed = List.generate(
@@ -299,8 +299,8 @@ class TFLiteService {
       }
 
       // Enforce top-K and threshold
-      const k = AppConfig.topK <= 0 ? 1 : AppConfig.topK;
-      const threshold = AppConfig.confidenceThreshold;
+      const k = AppConfig.TOP_K <= 0 ? 1 : AppConfig.TOP_K;
+      const threshold = AppConfig.CONFIDENCE_THRESHOLD;
 
       // Always compute the top sorted list for logging/debug
       final topKAll = indexed.take(math.min(3, indexed.length)).map((e) {
@@ -330,8 +330,9 @@ class TFLiteService {
   /// Các bước kiểm tra:
   /// 1. Kiểm tra chất lượng ảnh (blur detection)
   /// 2. Chạy inference
-  /// 3. Kiểm tra confidence threshold (>= 65%)
-  /// 4. Kiểm tra out-of-scope detection (entropy-based)
+  /// 3. Kiểm tra confidence threshold (>= 85%)
+  /// 4. Kiểm tra tính hợp lệ của nhãn + độ tách biệt top-1/top-2
+  /// 5. Kiểm tra out-of-scope detection (mơ hồ dự đoán + leaf-likelihood)
   Future<VerificationResult> runWithVerification(File imageFile) async {
     print('🔒 [TFLiteService] Bắt đầu inference với verification');
     
@@ -365,9 +366,19 @@ class TFLiteService {
     
     final topResult = predictions.first;
     print('🏆 [Verification] Top prediction: ${topResult.label} (${(topResult.confidence * 100).toStringAsFixed(1)}%)');
+
+    // ✅ BƯỚC 3A: Kiểm tra nhãn có hợp lệ hay không (tránh trả về chỉ tên cây chung chung)
+    if (!_isValidPlantDiseaseLabel(topResult.label)) {
+      print('❌ [Verification] Nhãn không hợp lệ hoặc quá chung chung: ${topResult.label}');
+      return VerificationResult.failed(
+        error: VerificationError.outOfScope,
+        message: 'Ảnh không thuộc nhóm bệnh/lá cây được hỗ trợ',
+        imageQualityScore: qualityResult.blurScore,
+      );
+    }
     
     // ✅ BƯỚC 3: Kiểm tra confidence threshold
-    const confidenceThreshold = AppConfig.lowConfidenceRetakeThreshold; // 65%
+    const confidenceThreshold = AppConfig.LOW_CONFIDENCE_RETAKE_THRESHOLD; // 85%
     
     if (topResult.confidence < confidenceThreshold) {
       print('⚠️  [Verification] Confidence thấp: ${(topResult.confidence * 100).toStringAsFixed(1)}% < ${(confidenceThreshold * 100).toInt()}%');
@@ -377,8 +388,33 @@ class TFLiteService {
         imageQualityScore: qualityResult.blurScore,
       );
     }
+
+    // ✅ BƯỚC 3B: Kiểm tra độ tách biệt giữa top-1 và top-2
+    if (predictions.length >= 2) {
+      final gap = predictions[0].confidence - predictions[1].confidence;
+      if (gap < AppConfig.MIN_TOP1_TOP2_GAP) {
+        print('⚠️  [Verification] Dự đoán mơ hồ: gap top1-top2 = ${(gap * 100).toStringAsFixed(1)}%');
+        return VerificationResult.failed(
+          error: VerificationError.lowConfidence,
+          message: 'Kết quả chưa đủ rõ ràng, vui lòng chụp sát lá và đủ sáng hơn',
+          imageQualityScore: qualityResult.blurScore,
+        );
+      }
+    }
+
+    // ✅ BƯỚC 4A: Kiểm tra khả năng ảnh có chứa lá cây hay không
+    final leafColorRatio = await _estimateLeafColorRatio(imageFile);
+    print('   🌿 Leaf-like color ratio: ${(leafColorRatio * 100).toStringAsFixed(1)}%');
+    if (leafColorRatio < AppConfig.MIN_LEAF_COLOR_RATIO) {
+      print('❌ [Verification] Ảnh có dấu hiệu không phải lá cây');
+      return VerificationResult.failed(
+        error: VerificationError.outOfScope,
+        message: 'Ảnh không giống lá cây. Vui lòng chụp trực tiếp lá cây rõ nét.',
+        imageQualityScore: qualityResult.blurScore,
+      );
+    }
     
-    // ✅ BƯỚC 4: Kiểm tra out-of-scope (OOD detection)
+    // ✅ BƯỚC 5: Kiểm tra out-of-scope (OOD detection)
     // Sử dụng entropy và max probability để phát hiện ảnh ngoài phạm vi
     final isOutOfScope = _detectOutOfScope(predictions);
     
@@ -397,6 +433,75 @@ class TFLiteService {
       predictions: predictions,
       imageQualityScore: qualityResult.blurScore,
     );
+  }
+
+  bool _isValidPlantDiseaseLabel(String label) {
+    final normalized = label.trim().toLowerCase();
+    if (normalized.isEmpty) return false;
+
+    // PlantVillage labels usually follow: Plant___DiseaseName
+    if (normalized.contains('___')) {
+      final parts = normalized.split('___');
+      if (parts.length < 2) return false;
+      final plant = parts.first.trim();
+      final disease = parts.sublist(1).join('___').trim();
+      if (plant.isEmpty || disease.isEmpty) return false;
+      return true;
+    }
+
+    // Fallback guard: plain labels like just "tomato" are too generic
+    const diseaseKeywords = [
+      'healthy',
+      'blight',
+      'spot',
+      'rust',
+      'mold',
+      'virus',
+      'scab',
+      'rot',
+      'mite',
+      'measles',
+    ];
+    return diseaseKeywords.any(normalized.contains);
+  }
+
+  Future<double> _estimateLeafColorRatio(File imageFile) async {
+    try {
+      final bytes = await imageFile.readAsBytes();
+      final image = img.decodeImage(bytes);
+      if (image == null) return 0.0;
+
+      final sampled = img.copyResize(image, width: 224, height: 224);
+      var total = 0;
+      var leafLike = 0;
+
+      for (var y = 0; y < sampled.height; y += 2) {
+        for (var x = 0; x < sampled.width; x += 2) {
+          final p = sampled.getPixelSafe(x, y);
+          final r = p.r.toDouble();
+          final g = p.g.toDouble();
+          final b = p.b.toDouble();
+
+          // Excess Green index (common vegetation heuristic)
+          final exg = (2 * g) - r - b;
+          final isGreenLeaf = exg > 15 && g > 35;
+
+          // Brown/yellow damaged leaf tones (to not reject sick leaves too aggressively)
+          final isDryLeafTone = r > 55 && g > 35 && b < 90 && r > g;
+
+          total++;
+          if (isGreenLeaf || isDryLeafTone) {
+            leafLike++;
+          }
+        }
+      }
+
+      if (total == 0) return 0.0;
+      return leafLike / total;
+    } catch (_) {
+      // Fail-open: if this check fails technically, don't reject image only by this signal.
+      return 0.2;
+    }
   }
 
   /// Phát hiện ảnh ngoài phạm vi sử dụng entropy-based OOD detection
@@ -433,7 +538,7 @@ class TFLiteService {
     print('   🔍 OOD check: entropy=${normalizedEntropy.toStringAsFixed(3)}, maxProb=${(topResult.confidence * 100).toStringAsFixed(1)}%');
     
     // Nếu entropy > 0.8 (phân bố gần như đều) → likely OOD
-    const entropyThreshold = 0.80;
+    const entropyThreshold = 0.75;
     if (normalizedEntropy > entropyThreshold) {
       print('   🔍 OOD: Entropy cao (${normalizedEntropy.toStringAsFixed(3)})');
       return true;
@@ -442,7 +547,7 @@ class TFLiteService {
     // Threshold 3: Gap giữa top-1 và top-2 quá nhỏ
     if (predictions.length >= 2) {
       final gap = topResult.confidence - predictions[1].confidence;
-      const minGap = 0.10; // Cần chênh lệch ít nhất 10%
+      const minGap = AppConfig.MIN_TOP1_TOP2_GAP;
       
       if (gap < minGap) {
         print('   🔍 OOD: Gap giữa top-1 và top-2 quá nhỏ (${(gap * 100).toStringAsFixed(1)}%)');

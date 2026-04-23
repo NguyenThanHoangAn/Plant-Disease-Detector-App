@@ -61,7 +61,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get retake => 'Chụp lại';
 
   @override
-  String get useThisImage => 'Dùng ảnh này';
+  String get useThisImage => 'Dùng ảnh';
 
   @override
   String get cancel => 'Hủy';
@@ -244,6 +244,38 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get captureError => '❌ Lỗi chụp ảnh';
+
+  @override
+  String get cameraNotFoundOnDevice => 'Không tìm thấy camera trên thiết bị';
+
+  @override
+  String cameraInitializationError(Object error) {
+    return 'Lỗi khởi tạo camera: $error';
+  }
+
+  @override
+  String get cameraInitializing => 'Đang khởi tạo camera...';
+
+  @override
+  String get cameraCaptureLeafTitle => 'Chụp ảnh lá cây';
+
+  @override
+  String get cameraTipsTitle => 'Mẹo chụp ảnh chính xác:';
+
+  @override
+  String get cameraTipsBody =>
+      '• Đặt lá trong khung trắng\n• Ánh sáng đủ, không mờ\n• Lá phẳng, rõ nét\n• Tránh bóng đổ';
+
+  @override
+  String get cameraAccessDenied =>
+      'Quyền truy cập camera/thư viện bị từ chối. Vui lòng bật quyền trong cài đặt.';
+
+  @override
+  String get cameraDeviceError => 'Lỗi camera. Vui lòng kiểm tra thiết bị.';
+
+  @override
+  String get insufficientMemory =>
+      'Bộ nhớ không đủ. Vui lòng dọn dẹp thiết bị.';
 
   @override
   String get processingFailed => 'Xử lý thất bại';

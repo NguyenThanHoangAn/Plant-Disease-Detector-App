@@ -57,3 +57,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Markdown docs (do not push ad-hoc .md files)
+*.md
+!README.md

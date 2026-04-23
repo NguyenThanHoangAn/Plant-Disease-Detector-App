@@ -20,10 +20,12 @@ class DeepLearningHomePage extends ConsumerStatefulWidget {
   const DeepLearningHomePage({super.key});
 
   @override
-  ConsumerState<DeepLearningHomePage> createState() => _DeepLearningHomePageState();
+  ConsumerState<DeepLearningHomePage> createState() =>
+      _DeepLearningHomePageState();
 }
 
-class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
+class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
+    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   File? _selectedImage;
   int _currentIndex = 0;
 
@@ -45,12 +47,11 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed) {
-    }
+    if (state == AppLifecycleState.resumed) {}
   }
 
   /// 📸 MỞ CAMERA TRONG APP (không out ra ngoài)
-  /// 
+  ///
   /// Flow:
   /// 1. Push CameraCapturePage → Hiển thị camera preview ngay trong app
   /// 2. User chụp ảnh → Lưu file tạm
@@ -66,14 +67,12 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
       );
 
       if (file != null && mounted) {
-
         setState(() {
           _selectedImage = file;
         });
 
         await ref.read(inferenceProvider.notifier).runInference(file);
-      } else {
-      }
+      } else {}
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -87,7 +86,7 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
   }
 
   /// 📸 MỞ CAMERA/GALLERY NATIVE (có thể gây reload)
-  /// 
+  ///
   /// Flow:
   /// 1. Push CameraPreviewPage → User chụp/chọn ảnh
   /// 2. User confirm ảnh → CameraPreviewPage return File
@@ -104,7 +103,6 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
       );
 
       if (file != null && mounted) {
-
         // ✅ BƯỚC 1: Lưu ảnh vào state (để hiển thị preview)
         setState(() {
           _selectedImage = file;
@@ -112,8 +110,7 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
 
         // ✅ BƯỚC 2: Tự động gọi inference (nếu state listener hoạt động)
         await ref.read(inferenceProvider.notifier).runInference(file);
-      } else {
-      }
+      } else {}
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -127,7 +124,8 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
   }
 
   /// 🚨 Hiển thị dialog lỗi verification
-  void _showVerificationErrorDialog(BuildContext context, VerificationResult result, AppLocalizations l10n) {
+  void _showVerificationErrorDialog(
+      BuildContext context, VerificationResult result, AppLocalizations l10n) {
     String title;
     String message;
     IconData icon;
@@ -142,13 +140,13 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
         break;
       case VerificationError.lowConfidence:
         title = l10n.lowConfidence;
-        message = l10n.lowConfidenceDesc;
+        message = result.message ?? l10n.lowConfidenceDesc;
         icon = Icons.error_outline;
         iconColor = Colors.amber;
         break;
       case VerificationError.outOfScope:
         title = l10n.imageOutOfScope;
-        message = l10n.imageOutOfScopeDesc;
+        message = result.message ?? l10n.imageOutOfScopeDesc;
         icon = Icons.cancel;
         iconColor = Colors.red;
         break;
@@ -233,7 +231,7 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
-    
+
     // 👁️ WATCH inference state để tự động cập nhật UI
     final inferenceState = ref.watch(inferenceProvider);
     final theme = Theme.of(context);
@@ -244,17 +242,21 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
       next.when(
         data: (verificationResult) {
           if (verificationResult == null) return;
-          
+
           // ✅ PASS: Navigate sang ResultDetailPage
-          if (verificationResult.isPassed && verificationResult.predictions.isNotEmpty && mounted && _selectedImage != null) {
+          if (verificationResult.isPassed &&
+              verificationResult.predictions.isNotEmpty &&
+              mounted &&
+              _selectedImage != null) {
             final top1 = verificationResult.predictions.first;
-            
+
             // 🔄 NAVIGATE sang ResultDetailPage
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => ResultDetailPage(result: top1, image: _selectedImage),
+                    builder: (_) =>
+                        ResultDetailPage(result: top1, image: _selectedImage),
                   ),
                 );
               }
@@ -262,7 +264,6 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
           }
           // ❌ FAIL: Hiển thị dialog lỗi verification
           else if (!verificationResult.isPassed && mounted) {
-            
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 _showVerificationErrorDialog(context, verificationResult, l10n);
@@ -270,8 +271,7 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
             });
           }
         },
-        loading: () {
-        },
+        loading: () {},
         error: (error, stackTrace) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -305,7 +305,8 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
     );
   }
 
-  Widget _buildHomeTab(ThemeData theme, AsyncValue<VerificationResult?> inferenceState) {
+  Widget _buildHomeTab(
+      ThemeData theme, AsyncValue<VerificationResult?> inferenceState) {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -344,7 +345,12 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage> wit
                           const SizedBox(height: 32),
                           _KeyFeaturesSection(theme: theme),
                           const SizedBox(height: 24),
-                          _SupportedCropsSection(theme: theme),
+                          _SupportedCropsSection(
+                            theme: theme,
+                            onOpenSupportedPlants: () {
+                              setState(() => _currentIndex = 2);
+                            },
+                          ),
                         ],
                       ),
                     ),
@@ -380,7 +386,8 @@ class _Header extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.camera_alt, color: Colors.white, size: 24),
+                child:
+                    const Icon(Icons.camera_alt, color: Colors.white, size: 24),
               ),
               const SizedBox(width: 12),
               Text(
@@ -436,7 +443,7 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -527,7 +534,7 @@ class _KeyFeaturesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -648,14 +655,18 @@ class _FeatureCard extends StatelessWidget {
 }
 
 class _SupportedCropsSection extends StatelessWidget {
-  const _SupportedCropsSection({required this.theme});
+  const _SupportedCropsSection({
+    required this.theme,
+    required this.onOpenSupportedPlants,
+  });
 
   final ThemeData theme;
+  final VoidCallback onOpenSupportedPlants;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -671,9 +682,7 @@ class _SupportedCropsSection extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: () {
-                // Navigate to plants page
-              },
+              onPressed: onOpenSupportedPlants,
               child: Text(
                 '${l10n.viewDetails} →',
                 style: TextStyle(
@@ -690,13 +699,11 @@ class _SupportedCropsSection extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: [
-            _CropChip(nameKey: 'tomato'),
-            _CropChip(nameKey: 'potato'),
-            _CropChip(nameKey: 'rice'),
-            _CropChip(nameKey: 'corn'),
-            _CropChip(nameKey: 'chili'),
-            _CropChip(nameKey: 'cucumber'),
-            _CropChip(nameKey: 'more', customText: '+12'),
+            _CropChip(nameKey: 'tomato', onTap: onOpenSupportedPlants),
+            _CropChip(nameKey: 'grape', onTap: onOpenSupportedPlants),
+            _CropChip(nameKey: 'potato', onTap: onOpenSupportedPlants),
+            _CropChip(nameKey: 'apple', onTap: onOpenSupportedPlants),
+            _CropChip(nameKey: 'corn', onTap: onOpenSupportedPlants),
           ],
         ),
       ],
@@ -705,10 +712,11 @@ class _SupportedCropsSection extends StatelessWidget {
 }
 
 class _CropChip extends StatelessWidget {
-  const _CropChip({required this.nameKey, this.customText});
+  const _CropChip({required this.nameKey, this.customText, this.onTap});
 
   final String nameKey;
   final String? customText;
+  final VoidCallback? onTap;
 
   String _getLocalizedName(AppLocalizations l10n) {
     switch (nameKey) {
@@ -743,23 +751,28 @@ class _CropChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final displayText = customText != null 
+    final displayText = customText != null
         ? '$customText ${_getLocalizedName(l10n)}'
         : _getLocalizedName(l10n);
-    
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.35)),
-      ),
-      child: Text(
-        displayText,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: theme.colorScheme.primary,
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.35)),
+        ),
+        child: Text(
+          displayText,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.primary,
+          ),
         ),
       ),
     );
@@ -791,7 +804,8 @@ class _PreviewArea extends StatelessWidget {
           ? Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.image_outlined, color: theme.colorScheme.primary, size: 48),
+                Icon(Icons.image_outlined,
+                    color: theme.colorScheme.primary, size: 48),
                 const SizedBox(height: 12),
                 const Text(
                   'No image selected',
@@ -951,7 +965,8 @@ class _SecondaryActionButton extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                    style:
+                        const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
                   ),
                 ],
               ),
@@ -1087,19 +1102,22 @@ class _HowItWorksCard extends StatelessWidget {
           _StepItem(
             index: 1,
             title: 'Capture Leaf Image',
-            description: 'Take a clear photo of the tomato leaf or upload from your gallery',
+            description:
+                'Take a clear photo of the tomato leaf or upload from your gallery',
           ),
           SizedBox(height: 12),
           _StepItem(
             index: 2,
             title: 'CNN Analysis',
-            description: 'Our deep learning model analyzes the image with high accuracy',
+            description:
+                'Our deep learning model analyzes the image with high accuracy',
           ),
           SizedBox(height: 12),
           _StepItem(
             index: 3,
             title: 'Disease Classification',
-            description: 'Get instant results with disease name, confidence score, and guidance',
+            description:
+                'Get instant results with disease name, confidence score, and guidance',
           ),
         ],
       ),
@@ -1159,7 +1177,8 @@ class _AnalyzingOverlay extends StatelessWidget {
                           shape: BoxShape.circle,
                           color: theme.colorScheme.primary.withOpacity(0.12),
                         ),
-                        child: Icon(Icons.auto_graph_rounded, color: theme.colorScheme.primary),
+                        child: Icon(Icons.auto_graph_rounded,
+                            color: theme.colorScheme.primary),
                       ),
                       const SizedBox(width: 12),
                       const Text(
@@ -1194,7 +1213,9 @@ class _AnalyzingOverlay extends StatelessWidget {
                       SizedBox(width: 10),
                       Text(
                         'Analyzing with TensorFlow Lite...',
-                        style: TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            color: Color(0xFF0F172A),
+                            fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -1213,7 +1234,8 @@ class _ShimmerBar extends StatefulWidget {
   State<_ShimmerBar> createState() => _ShimmerBarState();
 }
 
-class _ShimmerBarState extends State<_ShimmerBar> with SingleTickerProviderStateMixin {
+class _ShimmerBarState extends State<_ShimmerBar>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
@@ -1350,7 +1372,7 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       decoration: BoxDecoration(
@@ -1419,7 +1441,9 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = isActive ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant;
+    final color = isActive
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurfaceVariant;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -1488,13 +1512,19 @@ class _ResultCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: (isHighConfidence ? theme.colorScheme.error : theme.colorScheme.tertiary)
-                      .withValues(alpha: 0.1),
+                    color: (isHighConfidence
+                            ? theme.colorScheme.error
+                            : theme.colorScheme.tertiary)
+                        .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    isHighConfidence ? Icons.warning_amber_rounded : Icons.check_circle_outline,
-                    color: isHighConfidence ? theme.colorScheme.error : theme.colorScheme.tertiary,
+                    isHighConfidence
+                        ? Icons.warning_amber_rounded
+                        : Icons.check_circle_outline,
+                    color: isHighConfidence
+                        ? theme.colorScheme.error
+                        : theme.colorScheme.tertiary,
                     size: 24,
                   ),
                 ),
@@ -1531,7 +1561,9 @@ class _ResultCard extends StatelessWidget {
                 minHeight: 8,
                 backgroundColor: Colors.grey[200],
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  isHighConfidence ? theme.colorScheme.error : theme.colorScheme.primary,
+                  isHighConfidence
+                      ? theme.colorScheme.error
+                      : theme.colorScheme.primary,
                 ),
               ),
             ),

@@ -203,7 +203,7 @@ abstract class AppLocalizations {
   /// No description provided for @useThisImage.
   ///
   /// In en, this message translates to:
-  /// **'Use This Image'**
+  /// **'Use Image'**
   String get useThisImage;
 
   /// No description provided for @cancel.
@@ -565,6 +565,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'❌ Capture error'**
   String get captureError;
+
+  /// No description provided for @cameraNotFoundOnDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'No camera found on device'**
+  String get cameraNotFoundOnDevice;
+
+  /// No description provided for @cameraInitializationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera initialization error: {error}'**
+  String cameraInitializationError(Object error);
+
+  /// No description provided for @cameraInitializing.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing camera...'**
+  String get cameraInitializing;
+
+  /// No description provided for @cameraCaptureLeafTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Plant Leaf'**
+  String get cameraCaptureLeafTitle;
+
+  /// No description provided for @cameraTipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips for accurate capture:'**
+  String get cameraTipsTitle;
+
+  /// No description provided for @cameraTipsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'• Place the leaf in the white frame\n• Ensure good lighting\n• Keep the leaf flat and focused\n• Avoid shadows'**
+  String get cameraTipsBody;
+
+  /// No description provided for @cameraAccessDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera/gallery permission denied. Please enable permission in settings.'**
+  String get cameraAccessDenied;
+
+  /// No description provided for @cameraDeviceError.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera error. Please check your device.'**
+  String get cameraDeviceError;
+
+  /// No description provided for @insufficientMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough memory. Please free up device storage.'**
+  String get insufficientMemory;
 
   /// No description provided for @processingFailed.
   ///

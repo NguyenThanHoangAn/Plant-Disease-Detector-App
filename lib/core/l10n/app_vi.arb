@@ -24,7 +24,7 @@
   "confidence": "Độ tin cậy",
   "viewDetails": "Xem chi tiết",
   "retake": "Chụp lại",
-  "useThisImage": "Dùng ảnh này",
+  "useThisImage": "Dùng ảnh",
   "cancel": "Hủy",
   "confirm": "Xác nhận",
 
@@ -99,6 +99,20 @@
   "imageSaved": "Đã lưu ảnh",
   "imageCaptured": "✓ Ảnh đã được chụp",
   "captureError": "❌ Lỗi chụp ảnh",
+  "cameraNotFoundOnDevice": "Không tìm thấy camera trên thiết bị",
+  "cameraInitializationError": "Lỗi khởi tạo camera: {error}",
+  "@cameraInitializationError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cameraInitializing": "Đang khởi tạo camera...",
+  "cameraCaptureLeafTitle": "Chụp ảnh lá cây",
+  "cameraTipsTitle": "Mẹo chụp ảnh chính xác:",
+  "cameraTipsBody": "• Đặt lá trong khung trắng\n• Ánh sáng đủ, không mờ\n• Lá phẳng, rõ nét\n• Tránh bóng đổ",
+  "cameraAccessDenied": "Quyền truy cập camera/thư viện bị từ chối. Vui lòng bật quyền trong cài đặt.",
+  "cameraDeviceError": "Lỗi camera. Vui lòng kiểm tra thiết bị.",
+  "insufficientMemory": "Bộ nhớ không đủ. Vui lòng dọn dẹp thiết bị.",
   
   "processingFailed": "Xử lý thất bại",
   "modelLoadFailed": "Không thể tải mô hình",

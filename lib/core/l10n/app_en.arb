@@ -24,7 +24,7 @@
   "confidence": "Confidence",
   "viewDetails": "View Details",
   "retake": "Retake",
-  "useThisImage": "Use This Image",
+  "useThisImage": "Use Image",
   "cancel": "Cancel",
   "confirm": "Confirm",
 
@@ -99,6 +99,20 @@
   "imageSaved": "Image saved",
   "imageCaptured": "✓ Image captured",
   "captureError": "❌ Capture error",
+  "cameraNotFoundOnDevice": "No camera found on device",
+  "cameraInitializationError": "Camera initialization error: {error}",
+  "@cameraInitializationError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cameraInitializing": "Initializing camera...",
+  "cameraCaptureLeafTitle": "Capture Plant Leaf",
+  "cameraTipsTitle": "Tips for accurate capture:",
+  "cameraTipsBody": "• Place the leaf in the white frame\n• Ensure good lighting\n• Keep the leaf flat and focused\n• Avoid shadows",
+  "cameraAccessDenied": "Camera/gallery permission denied. Please enable permission in settings.",
+  "cameraDeviceError": "Camera error. Please check your device.",
+  "insufficientMemory": "Not enough memory. Please free up device storage.",
   
   "processingFailed": "Processing failed",
   "modelLoadFailed": "Failed to load model",

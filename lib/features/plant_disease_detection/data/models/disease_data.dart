@@ -35,6 +35,14 @@ class DiseaseInfo {
 
 // Disease data repository
 class DiseaseDataRepository {
+  static const Map<String, BilingualText> _plantNameByLabelPrefix = {
+    'apple': BilingualText('Táo', 'Apple'),
+    'corn': BilingualText('Ngô', 'Corn'),
+    'grape': BilingualText('Nho', 'Grape'),
+    'potato': BilingualText('Khoai tây', 'Potato'),
+    'tomato': BilingualText('Cà chua', 'Tomato'),
+  };
+
   static final Map<String, DiseaseInfo> _diseaseData = {
     'healthy': const DiseaseInfo(
       plantName: BilingualText('Cây', 'Plant'),
@@ -2152,13 +2160,19 @@ class DiseaseDataRepository {
 
   // Helper method to normalize label for lookup
   static String _normalizeLabel(String label) {
-    final normalized = label.toLowerCase().replaceAll('___', ' ').replaceAll('_', ' ').trim();
+    final normalized = label
+        .toLowerCase()
+        .replaceAll('___', ' ')
+        .replaceAll('_', ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
     
     // Map common patterns to standardized keys
     if (normalized.contains('healthy')) return 'healthy';
     if (normalized.contains('early blight')) return 'early_blight';
     if (normalized.contains('late blight')) return 'late_blight';
-    if (normalized.contains('septoria') || normalized.contains('leaf spot')) return 'septoria_leaf_spot';
+    if (normalized.contains('cercospora')) return 'cercospora_leaf_spot';
+    if (normalized.contains('septoria')) return 'septoria_leaf_spot';
     if (normalized.contains('bacterial spot')) return 'bacterial_spot';
     if (normalized.contains('leaf mold')) return 'leaf_mold';
     if (normalized.contains('target spot')) return 'target_spot';
@@ -2168,7 +2182,7 @@ class DiseaseDataRepository {
     if (normalized.contains('black rot')) return 'black_rot';
     if (normalized.contains('rust')) return 'rust';
     if (normalized.contains('esca')) return 'esca';
-    if (normalized.contains('cercospora')) return 'cercospora_leaf_spot';
+    if (normalized.contains('isariopsis')) return 'blight';
     if (normalized.contains('blight')) return 'blight';
     
     return normalized;
@@ -2317,15 +2331,79 @@ class DiseaseDataRepository {
 
   // Get plant name
   static String getPlantName(String label, String locale) {
+    final labelPlant = _extractPlantPrefix(label);
+    if (labelPlant != null && _plantNameByLabelPrefix.containsKey(labelPlant)) {
+      return _plantNameByLabelPrefix[labelPlant]!.getLocalized(locale);
+    }
+
     final info = getInfo(label);
-    return info?.plantName.getLocalized(locale) ?? 
-           (locale == 'vi' ? 'Cây không xác định' : 'Unknown Plant');
+    return info?.plantName.getLocalized(locale) ??
+        (locale == 'vi' ? 'Cây không xác định' : 'Unknown Plant');
   }
 
   // Get disease name
   static String getDiseaseName(String label, String locale) {
     final info = getInfo(label);
-    return info?.diseaseName.getLocalized(locale) ?? 
-           (locale == 'vi' ? 'Bệnh không xác định' : 'Unknown Disease');
+    if (info != null) {
+      return info.diseaseName.getLocalized(locale);
+    }
+
+    final diseasePart = _extractDiseasePart(label);
+    if (diseasePart.isNotEmpty) {
+      final normalized = diseasePart.toLowerCase();
+      if (normalized.contains('healthy')) {
+        return locale == 'vi' ? 'Khỏe mạnh' : 'Healthy';
+      }
+      return _titleCaseWords(diseasePart);
+    }
+
+    return locale == 'vi' ? 'Bệnh không xác định' : 'Unknown Disease';
+  }
+
+  static String? _extractPlantPrefix(String label) {
+    final normalized = label.trim();
+    if (normalized.isEmpty) return null;
+
+    if (normalized.contains('___')) {
+      final prefix = normalized.split('___').first.trim().toLowerCase();
+      return prefix.isEmpty ? null : prefix;
+    }
+
+    final tokens = normalized.split(RegExp(r'\s+'));
+    if (tokens.isEmpty) return null;
+    final candidate = tokens.first.trim().toLowerCase();
+    return candidate.isEmpty ? null : candidate;
+  }
+
+  static String _extractDiseasePart(String label) {
+    final normalized = label.trim();
+    if (normalized.isEmpty) return '';
+
+    String diseasePart;
+    if (normalized.contains('___')) {
+      final parts = normalized.split('___');
+      diseasePart = parts.length > 1 ? parts.sublist(1).join('___') : '';
+    } else {
+      final tokens = normalized.split(RegExp(r'\s+'));
+      diseasePart = tokens.length > 1 ? tokens.sublist(1).join(' ') : normalized;
+    }
+
+    return diseasePart
+        .replaceAll('_', ' ')
+        .replaceAll('(', ' (')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+  }
+
+  static String _titleCaseWords(String input) {
+    if (input.isEmpty) return input;
+
+    final lower = input.toLowerCase();
+    final words = lower.split(' ');
+    final transformed = words.map((word) {
+      if (word.isEmpty) return word;
+      return '${word[0].toUpperCase()}${word.substring(1)}';
+    }).join(' ');
+    return transformed.trim();
   }
 }

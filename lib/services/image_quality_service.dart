@@ -12,11 +12,12 @@ final imageQualityServiceProvider = Provider<ImageQualityService>((ref) {
 class ImageQualityService {
   /// Kiểm tra độ mờ của ảnh sử dụng Laplacian variance
   /// Trả về score từ 0-100 (càng cao càng rõ nét)
-  /// 
+  ///
   /// Threshold gợi ý:
   /// - < 30: Rất mờ (reject)
   /// - 30-50: Mờ vừa (warning)
-  /// - > 50: Rõ nét (accept)
+  /// - 50-70: Tốt nhưng chưa đủ ngưỡng verify
+  /// - >= 70: Đạt ngưỡng verify
   Future<ImageQualityResult> checkImageQuality(File imageFile) async {
     try {
       print('🔍 [ImageQuality] Đang kiểm tra chất lượng ảnh...');
@@ -48,7 +49,7 @@ class ImageQualityService {
       print('   📊 Blur score: ${normalizedScore.toStringAsFixed(1)} (raw: ${blurScore.toStringAsFixed(2)})');
       
       // Đánh giá chất lượng
-      final isGoodQuality = normalizedScore >= 30; // Threshold
+      final isGoodQuality = normalizedScore >= 70; // Verification threshold
       final quality = _getQualityLabel(normalizedScore);
       
       print('   ${isGoodQuality ? "✅" : "❌"} Chất lượng: $quality');

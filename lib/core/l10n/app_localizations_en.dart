@@ -61,7 +61,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retake => 'Retake';
 
   @override
-  String get useThisImage => 'Use This Image';
+  String get useThisImage => 'Use Image';
 
   @override
   String get cancel => 'Cancel';
@@ -244,6 +244,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get captureError => '❌ Capture error';
+
+  @override
+  String get cameraNotFoundOnDevice => 'No camera found on device';
+
+  @override
+  String cameraInitializationError(Object error) {
+    return 'Camera initialization error: $error';
+  }
+
+  @override
+  String get cameraInitializing => 'Initializing camera...';
+
+  @override
+  String get cameraCaptureLeafTitle => 'Capture Plant Leaf';
+
+  @override
+  String get cameraTipsTitle => 'Tips for accurate capture:';
+
+  @override
+  String get cameraTipsBody =>
+      '• Place the leaf in the white frame\n• Ensure good lighting\n• Keep the leaf flat and focused\n• Avoid shadows';
+
+  @override
+  String get cameraAccessDenied =>
+      'Camera/gallery permission denied. Please enable permission in settings.';
+
+  @override
+  String get cameraDeviceError => 'Camera error. Please check your device.';
+
+  @override
+  String get insufficientMemory =>
+      'Not enough memory. Please free up device storage.';
 
   @override
   String get processingFailed => 'Processing failed';

@@ -65,6 +65,7 @@ class _CameraPreviewPageState extends State<CameraPreviewPage> with WidgetsBindi
     });
 
     try {
+      final l10n = AppLocalizations.of(context)!;
       print('📷 [CameraPreviewPage._pickImage] Bắt đầu chọn ảnh từ ${source.name}');
 
       final XFile? xFile = await _picker.pickImage(
@@ -89,7 +90,7 @@ class _CameraPreviewPageState extends State<CameraPreviewPage> with WidgetsBindi
 
       // ✅ Kiểm tra file tồn tại
       if (!imageFile.existsSync()) {
-        throw Exception('Ảnh không tồn tại: ${imageFile.path}');
+        throw Exception('${l10n.imageNotFound}: ${imageFile.path}');
       }
 
       print('✅ [CameraPreviewPage._pickImage] Ảnh được chọn: ${imageFile.path}');
@@ -123,9 +124,10 @@ class _CameraPreviewPageState extends State<CameraPreviewPage> with WidgetsBindi
       print('❌ [CameraPreviewPage._pickImage] Lỗi: $e');
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         setState(() {
           _isLoading = false;
-          _errorMessage = _getErrorMessage(e);
+          _errorMessage = _getErrorMessage(e, l10n);
         });
 
         // Show error snackbar
@@ -135,7 +137,7 @@ class _CameraPreviewPageState extends State<CameraPreviewPage> with WidgetsBindi
               children: [
                 const Icon(Icons.error_outline, color: Colors.white),
                 const SizedBox(width: 12),
-                Expanded(child: Text('❌ Lỗi: $_errorMessage')),
+                Expanded(child: Text('${l10n.error}: $_errorMessage')),
               ],
             ),
             duration: const Duration(seconds: 3),
@@ -166,8 +168,9 @@ class _CameraPreviewPageState extends State<CameraPreviewPage> with WidgetsBindi
         });
       } else if (response.exception != null) {
         print('⚠️ [CameraPreviewPage._recoverLostData] Lỗi phục hồi: ${response.exception}');
+        final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _errorMessage = _getErrorMessage(response.exception!);
+          _errorMessage = _getErrorMessage(response.exception!, l10n);
           _isLoading = false;
           _hasRecoveredLostData = true;
         });
@@ -249,15 +252,15 @@ class _CameraPreviewPageState extends State<CameraPreviewPage> with WidgetsBindi
   }
 
   /// 📊 Xử lý các loại lỗi khác nhau
-  String _getErrorMessage(Object error) {
+  String _getErrorMessage(Object error, AppLocalizations l10n) {
     final message = error.toString().toLowerCase();
 
     if (message.contains('permission')) {
-      return 'Quyền truy cập camera/thư viện bị từ chối. Vui lòng bật quyền trong cài đặt.';
+      return l10n.cameraAccessDenied;
     } else if (message.contains('camera')) {
-      return 'Lỗi camera. Vui lòng kiểm tra thiết bị.';
+      return l10n.cameraDeviceError;
     } else if (message.contains('memory') || message.contains('out of memory')) {
-      return 'Bộ nhớ không đủ. Vui lòng dọn dẹp thiết bị.';
+      return l10n.insufficientMemory;
     } else {
       return error.toString();
     }

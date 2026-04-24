@@ -48,7 +48,7 @@ class DiseaseDataRepository {
   static const Map<String, String> _labelDiseaseKeyAliases = {
     'corn___cercospora_leaf_spot gray_leaf_spot': 'cercospora_leaf_spot',
     'corn___common_rust': 'rust',
-    'corn___northern_leaf_blight': 'blight',
+    'corn___northern_leaf_blight': 'northern_leaf_blight',
     'corn___healthy': 'healthy',
   };
 
@@ -2022,6 +2022,98 @@ class DiseaseDataRepository {
         BilingualText(
           'Tránh làm việc với cây khi ướt',
           'Avoid working with plants when wet',
+        ),
+      ],
+    ),
+    'northern_leaf_blight': const DiseaseInfo(
+      plantName: BilingualText('Ngô', 'Corn'),
+      diseaseName: BilingualText('Bệnh cháy lá phương Bắc', 'Northern Leaf Blight'),
+      description: BilingualText(
+        'Bệnh cháy lá phương Bắc trên ngô là bệnh nấm gây các vết tổn thương thuôn dài màu xám nâu và có thể làm giảm năng suất đáng kể.',
+        'Northern leaf blight in corn is a fungal disease that causes long gray-green to tan lesions and can significantly reduce yield.',
+      ),
+      symptoms: [
+        BilingualText(
+          'Vết bệnh dài hình thoi hoặc thuôn dài trên lá',
+          'Long, elliptical lesions on leaves',
+        ),
+        BilingualText(
+          'Vết bệnh chuyển từ xanh xám sang nâu khi bệnh tiến triển',
+          'Lesions turn from gray-green to tan as disease progresses',
+        ),
+        BilingualText(
+          'Lá bị khô sớm khi nhiễm nặng',
+          'Premature leaf drying under severe infection',
+        ),
+        BilingualText(
+          'Giảm quang hợp làm ảnh hưởng năng suất bắp',
+          'Reduced photosynthesis impacting ear yield',
+        ),
+      ],
+      causes: [
+        BilingualText(
+          'Nấm Exserohilum turcicum',
+          'Fungus Exserohilum turcicum',
+        ),
+        BilingualText(
+          'Độ ẩm cao và thời tiết mát kéo dài',
+          'Extended cool and humid weather',
+        ),
+        BilingualText(
+          'Tàn dư cây bệnh còn lại trên đồng ruộng',
+          'Infected crop residue left in the field',
+        ),
+      ],
+      preventionTips: [
+        BilingualText(
+          'Trồng giống ngô có tính kháng bệnh',
+          'Plant resistant corn hybrids',
+        ),
+        BilingualText(
+          'Luân canh cây trồng ít nhất 1-2 vụ',
+          'Rotate crops for at least 1-2 seasons',
+        ),
+        BilingualText(
+          'Vệ sinh đồng ruộng và xử lý tàn dư sau thu hoạch',
+          'Sanitize fields and manage crop residue after harvest',
+        ),
+        BilingualText(
+          'Theo dõi ruộng thường xuyên trong giai đoạn mẫn cảm',
+          'Scout fields regularly during susceptible growth stages',
+        ),
+      ],
+      organicTreatments: [
+        BilingualText(
+          'Có thể dùng chế phẩm gốc đồng theo khuyến cáo địa phương',
+          'Use copper-based products where locally recommended',
+        ),
+        BilingualText(
+          'Tăng cường sức khỏe cây bằng dinh dưỡng cân đối',
+          'Support plant vigor with balanced nutrition',
+        ),
+      ],
+      chemicalTreatments: [
+        BilingualText(
+          'Phun thuốc trừ nấm khi bệnh xuất hiện sớm và điều kiện thuận lợi cho nấm',
+          'Apply fungicides early when disease appears and weather favors spread',
+        ),
+        BilingualText(
+          'Ưu tiên hoạt chất nhóm triazole hoặc strobilurin theo hướng dẫn địa phương',
+          'Use triazole or strobilurin fungicides per local guidance',
+        ),
+      ],
+      culturalPractices: [
+        BilingualText(
+          'Giữ mật độ trồng hợp lý để thông thoáng ruộng',
+          'Maintain proper planting density for airflow',
+        ),
+        BilingualText(
+          'Bón phân cân đối, tránh thừa đạm',
+          'Apply balanced fertilization and avoid excess nitrogen',
+        ),
+        BilingualText(
+          'Kết hợp quản lý dịch hại tổng hợp (IPM)',
+          'Integrate the disease strategy into IPM practices',
         ),
       ],
     ),

@@ -56,8 +56,10 @@ class InferenceNotifier extends StateNotifier<AsyncValue<VerificationResult?>> {
 
       state = AsyncValue.data(verificationResult);
 
-      // ✅ BƯỚC 3: Lưu vào history (chỉ khi pass verification)
-      if (verificationResult.isPassed && verificationResult.predictions.isNotEmpty) {
+      // ✅ BƯỚC 3: Lưu vào history (chỉ khi pass hoàn toàn, không warning)
+      if (verificationResult.isPassed &&
+          !verificationResult.isWarning &&
+          verificationResult.predictions.isNotEmpty) {
         final topResult = verificationResult.predictions.first;
         final now = DateTime.now();
         final dateFormat = DateFormat('yyyy-MM-dd');
@@ -80,7 +82,7 @@ class InferenceNotifier extends StateNotifier<AsyncValue<VerificationResult?>> {
         _ref.read(historyProvider.notifier).refresh();
         print('🔄 [InferenceNotifier] Đã refresh history view');
       } else {
-        print('⚠️  [InferenceNotifier] Không lưu history (verification failed)');
+        print('⚠️  [InferenceNotifier] Không lưu history (không pass hoàn toàn)');
       }
     } catch (e, st) {
       print('❌ [InferenceNotifier] Lỗi inference: $e');

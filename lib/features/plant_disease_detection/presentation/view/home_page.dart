@@ -115,10 +115,10 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
     Color iconColor;
 
     if (result.isPassed && result.isWarning) {
-      title = '${l10n.lowConfidence} (Cảnh báo)';
-      message = result.message ?? l10n.lowConfidenceDesc;
-      icon = Icons.warning_amber_rounded;
-      iconColor = Colors.amber;
+      title = l10n.poorImageQuality;
+      message = l10n.poorImageQualityDesc;
+      icon = Icons.blur_on;
+      iconColor = Colors.orange;
     } else if (result.isPassed) {
       title = 'Đánh giá chất lượng ảnh';
       message = 'Ảnh đã được kiểm tra chất lượng và phân tích thành công.';
@@ -133,10 +133,10 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
           iconColor = Colors.orange;
           break;
         case VerificationError.lowConfidence:
-          title = '${l10n.lowConfidence} (Cảnh báo)';
-          message = result.message ?? l10n.lowConfidenceDesc;
-          icon = Icons.warning_amber_rounded;
-          iconColor = Colors.amber;
+          title = l10n.poorImageQuality;
+          message = l10n.poorImageQualityDesc;
+          icon = Icons.blur_on;
+          iconColor = Colors.orange;
           break;
         case VerificationError.outOfScope:
           title = l10n.imageOutOfScope;

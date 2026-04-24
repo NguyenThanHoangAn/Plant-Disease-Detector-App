@@ -423,18 +423,21 @@ class TFLiteService {
     }
 
     // ✅ BƯỚC 3: Kiểm tra confidence threshold
-    const confidenceThreshold =
-        AppConfig.LOW_CONFIDENCE_RETAKE_THRESHOLD; // 85%
+    // Use DEBUG override if set different from default
+    final confidenceThreshold =
+        AppConfig.DEBUG_CONFIDENCE_THRESHOLD_OVERRIDE;
 
     if (topResult.confidence < confidenceThreshold) {
       final confidencePct = (topResult.confidence * 100).toStringAsFixed(1);
       final thresholdPct = (confidenceThreshold * 100).toStringAsFixed(1);
-      print(
-          '⚠️  [Verification] Confidence thấp: ${confidencePct}% < ${thresholdPct}%');
-      return VerificationResult.failed(
+      _log(
+          '⚠️  [Verification] Confidence thấp: ${confidencePct}% < ${thresholdPct}%',
+          minLevel: 1);
+      return VerificationResult.warning(
+        predictions: predictions,
         error: VerificationError.lowConfidence,
         message:
-            'Độ tin cậy mô hình ${confidencePct}% thấp hơn ngưỡng ${thresholdPct}%',
+            'Độ tin cậy mô hình ${confidencePct}% thấp hơn ngưỡng ${thresholdPct}%. Kết quả được hiển thị kèm cảnh báo.',
         imageQualityScore: qualityResult.blurScore,
       );
     }
@@ -454,10 +457,11 @@ class TFLiteService {
             (AppConfig.TOMATO_BLIGHT_AMBIGUITY_GAP * 100).toStringAsFixed(1);
         print(
             '⚠️  [Verification] Mơ hồ Tomato blight: gap=${gapPct}% (<${minGapPct}%)');
-        return VerificationResult.failed(
+        return VerificationResult.warning(
+          predictions: predictions,
           error: VerificationError.lowConfidence,
           message:
-              'Mô hình đang phân vân giữa mốc sớm và mốc muộn (${gapPct}%). Vui lòng chụp cận vùng đốm bệnh trên một lá cà chua, đủ sáng, nét và nền đơn giản.',
+              'Mô hình đang phân vân giữa mốc sớm và mốc muộn (${gapPct}%). Kết quả được hiển thị kèm cảnh báo, nên chụp cận vùng đốm bệnh để xác nhận.',
           imageQualityScore: qualityResult.blurScore,
         );
       }
@@ -470,10 +474,11 @@ class TFLiteService {
         final gapPct = (gap * 100).toStringAsFixed(1);
         print(
             '⚠️  [Verification] Mơ hồ khác cây: $top1Plant vs $top2Plant, gap=${gapPct}%');
-        return VerificationResult.failed(
+        return VerificationResult.warning(
+          predictions: predictions,
           error: VerificationError.lowConfidence,
           message:
-              'Mô hình đang phân vân giữa 2 loại cây khác nhau (${gapPct}%). Vui lòng chụp sát một lá duy nhất, nền đơn giản và đủ sáng.',
+              'Mô hình đang phân vân giữa 2 loại cây khác nhau (${gapPct}%). Kết quả được hiển thị kèm cảnh báo, nên chụp sát một lá duy nhất để xác nhận.',
           imageQualityScore: qualityResult.blurScore,
         );
       }
@@ -483,10 +488,11 @@ class TFLiteService {
         final minGapPct =
             (AppConfig.MIN_TOP1_TOP2_GAP * 100).toStringAsFixed(1);
         print('⚠️  [Verification] Dự đoán mơ hồ: gap top1-top2 = ${gapPct}%');
-        return VerificationResult.failed(
+        return VerificationResult.warning(
+          predictions: predictions,
           error: VerificationError.lowConfidence,
           message:
-              'Dự đoán còn mơ hồ: chênh lệch top-1/top-2 là ${gapPct}% (yêu cầu tối thiểu ${minGapPct}%)',
+              'Dự đoán còn mơ hồ: chênh lệch top-1/top-2 là ${gapPct}% (yêu cầu tối thiểu ${minGapPct}%). Kết quả được hiển thị kèm cảnh báo.',
           imageQualityScore: qualityResult.blurScore,
         );
       }
@@ -718,8 +724,10 @@ class TFLiteService {
         height: height,
       );
       final accumulatedScores = List<double>.filled(numClasses, 0.0);
+      final cropConfidences = <int, double>{}; // Track top-1 confidence per crop
 
-      for (final modelView in modelViews) {
+      for (var viewIndex = 0; viewIndex < modelViews.length; viewIndex++) {
+        final modelView = modelViews[viewIndex];
         final input = _buildInputTensor(
           image: modelView,
           isFloatModel: isFloatModel,
@@ -745,6 +753,19 @@ class TFLiteService {
         _interpreter!.run(input, output);
         final viewScores =
             output is List<List<double>> ? output[0] : (output as List<double>);
+        
+        // Log confidence of this view
+        if (viewScores.isNotEmpty) {
+          final maxScore = viewScores.reduce(math.max);
+          cropConfidences[viewIndex] = maxScore;
+          if (AppConfig.DEBUG_MODE && AppConfig.INFERENCE_LOG_LEVEL >= 2) {
+            final scaleFactor = AppConfig.ENABLE_MULTI_CROP 
+                ? AppConfig.MULTI_CROP_SCALES[viewIndex]
+                : 1.0;
+            _log('   📊 Crop #${viewIndex + 1} (scale=${scaleFactor.toStringAsFixed(2)}): top-1 confidence = ${(maxScore * 100).toStringAsFixed(1)}%', minLevel: 2);
+          }
+        }
+        
         final limit = math.min(accumulatedScores.length, viewScores.length);
         for (var i = 0; i < limit; i++) {
           accumulatedScores[i] += viewScores[i];
@@ -754,6 +775,12 @@ class TFLiteService {
       final viewCount = math.max(1, modelViews.length);
       for (var i = 0; i < accumulatedScores.length; i++) {
         accumulatedScores[i] /= viewCount;
+      }
+      
+      // Log averaged confidence
+      if (AppConfig.DEBUG_MODE && AppConfig.INFERENCE_LOG_LEVEL >= 2 && viewCount > 1) {
+        final avgTopProb = (accumulatedScores.reduce(math.max) * 100).toStringAsFixed(1);
+        _log('   ✅ Averaged confidence (${viewCount} crops): ${avgTopProb}%', minLevel: 2);
       }
 
       final probabilities = AppConfig.OUTPUT_IS_SOFTMAX
@@ -803,7 +830,17 @@ class TFLiteService {
     final views = <img.Image>[];
     final seenCropSizes = <String>{};
 
-    for (final scale in AppConfig.MULTI_CROP_SCALES) {
+    // Support disabling multi-crop for stability testing
+    final scales = AppConfig.ENABLE_MULTI_CROP
+        ? AppConfig.MULTI_CROP_SCALES
+        : [1.0]; // Only center crop if multi-crop disabled
+
+    if (!AppConfig.ENABLE_MULTI_CROP) {
+      _log('⚙️  Multi-crop DISABLED - using single center crop only',
+          minLevel: 1);
+    }
+
+    for (final scale in scales) {
       final cropped = _cropCenteredSquare(image, scale);
       final cropKey = '${cropped.width}x${cropped.height}';
       if (!seenCropSizes.add(cropKey)) {
@@ -831,6 +868,7 @@ class TFLiteService {
       );
     }
 
+    _log('🎬 Built ${views.length} model view(s) for inference', minLevel: 2);
     return views;
   }
 
@@ -1046,23 +1084,35 @@ class TFLiteService {
     }
   }
 
+  /// Helper function for controlled logging based on log level
+  /// level 0: chỉ error
+  /// level 1: + warning & info
+  /// level 2: + chi tiết confidence từng crop (default)
+  /// level 3: + dump tất cả probabilities
+  void _log(String message, {int minLevel = 1}) {
+    if (!AppConfig.DEBUG_MODE) return;
+    if (AppConfig.INFERENCE_LOG_LEVEL >= minLevel) {
+      print(message);
+    }
+  }
+
   void _logModelInfo() {
     if (_interpreter == null) return;
     try {
       final inputT = _interpreter!.getInputTensor(0);
       final outputT = _interpreter!.getOutputTensor(0);
-      print('═══ MODEL INFO ═══');
-      print('📥 Input: shape=${inputT.shape}, type=${inputT.type}');
-      print('📤 Output: shape=${outputT.shape}, type=${outputT.type}');
-      print('🏷️  Labels: ${_labels.length} classes');
+      _log('═══ MODEL INFO ═══', minLevel: 1);
+      _log('📥 Input: shape=${inputT.shape}, type=${inputT.type}', minLevel: 1);
+      _log('📤 Output: shape=${outputT.shape}, type=${outputT.type}', minLevel: 1);
+      _log('🏷️  Labels: ${_labels.length} classes', minLevel: 1);
       if (_labels.length <= 12) {
         for (var i = 0; i < _labels.length; i++) {
-          print('   [$i] ${_labels[i]}');
+          _log('   [$i] ${_labels[i]}', minLevel: 1);
         }
       }
-      print('══════════════════');
+      _log('══════════════════', minLevel: 1);
     } catch (e) {
-      print('⚠️  Could not log model info: $e');
+      _log('⚠️  Could not log model info: $e', minLevel: 0);
     }
   }
 

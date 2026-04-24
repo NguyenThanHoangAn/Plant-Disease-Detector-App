@@ -444,31 +444,6 @@ class _TomatoHistoryViewState extends ConsumerState<TomatoHistoryView> {
                                       ),
                                       const SizedBox(height: 8),
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Text(
-                                                '${l10n.confidence}: ',
-                                                style: const TextStyle(
-                                                  fontSize: 11,
-                                                  color: Color(0xFF6B7280),
-                                                ),
-                                              ),
-                                              Text(
-                                                '${item.confidence}%',
-                                                style: const TextStyle(
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: Color(0xFF16A34A),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Row(
                                         children: [
                                           const Icon(
                                             Icons.calendar_today_outlined,

@@ -101,19 +101,6 @@ class HistoryDetailPage extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Text('${l10n.confidence}: ', style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
-                      Text(
-                        '${item.confidence}%',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF16A34A),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
                       Icon(Icons.calendar_today_outlined, size: 14, color: theme.colorScheme.onSurfaceVariant),
                       const SizedBox(width: 6),
                       Text(

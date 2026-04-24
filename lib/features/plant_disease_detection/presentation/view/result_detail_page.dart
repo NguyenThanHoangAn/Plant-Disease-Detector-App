@@ -127,7 +127,6 @@ class ResultDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final confidence = result.confidence;
     final isDiseased = !result.label.toLowerCase().contains('healthy');
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).languageCode;
@@ -257,39 +256,6 @@ class ResultDetailPage extends StatelessWidget {
                             color: theme.colorScheme.onSurface,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          l10n.confidenceScore,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.92),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(999),
-                                child: LinearProgressIndicator(
-                                  value: confidence,
-                                  minHeight: 10,
-                                  backgroundColor: theme.colorScheme.outlineVariant,
-                                  valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              '${(confidence * 100).toStringAsFixed(1)}%',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
@@ -363,66 +329,30 @@ class ResultDetailPage extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isDiseased
-                                    ? theme.colorScheme.errorContainer
-                                    : theme.colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                isDiseased ? l10n.diseased : l10n.healthy,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDiseased
-                                      ? theme.colorScheme.onErrorContainer
-                                      : theme.colorScheme.onPrimaryContainer,
-                                ),
-                              ),
-                            ),
                           ],
                         ),
-                        Text(
-                          l10n.modelConfidence,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurface,
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
                           ),
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(999),
-                                child: LinearProgressIndicator(
-                                  value: confidence,
-                                  minHeight: 10,
-                                  backgroundColor: theme.colorScheme.outlineVariant,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    isDiseased
-                                        ? theme.colorScheme.error
-                                        : theme.colorScheme.primary,
-                                  ),
-                                ),
-                              ),
+                          decoration: BoxDecoration(
+                            color: isDiseased
+                                ? theme.colorScheme.errorContainer
+                                : theme.colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            isDiseased ? l10n.diseased : l10n.healthy,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isDiseased
+                                  ? theme.colorScheme.onErrorContainer
+                                  : theme.colorScheme.onPrimaryContainer,
                             ),
-                            const SizedBox(width: 12),
-                            Text(
-                              '${(confidence * 100).toStringAsFixed(1)}%',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: isDiseased
-                                    ? theme.colorScheme.error
-                                    : theme.colorScheme.primary,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ],
                     ),

@@ -27,7 +27,7 @@ class AppConfig {
   static const int TOP_K = 3; // Hiển thị top 3 kết quả
 
   /// Verification threshold: only ask user to retake if confidence is below this value
-  static const double LOW_CONFIDENCE_RETAKE_THRESHOLD = 0.8; // 80%
+  static const double LOW_CONFIDENCE_RETAKE_THRESHOLD = 0.7; // 70%
 
   /// Extra verification thresholds to reduce false positives.
   static const double MIN_TOP1_TOP2_GAP =
@@ -50,4 +50,26 @@ class AppConfig {
     'background',
     'unknown',
   ];
+
+  /// ==================== DEBUG & STABILITY TUNING ====================
+  /// Bật mode debug để xem chi tiết log từng crop confidence, gap, entropy
+  static const bool DEBUG_MODE = true; // Set false để ẩn log chi tiết
+
+  /// Bật/tắt multi-crop TTA (Test-Time Augmentation)
+  /// true = chạy 3 crop, trung bình kết quả (ổn định hơn nhưng chậm)
+  /// false = chỉ chạy 1 crop giữa (nhanh nhưng có thể mình bạc)
+  static const bool ENABLE_MULTI_CROP = true;
+
+  /// Debug threshold: giảm xuống để test tính ổn định
+  /// Bình thường: 0.80 (80%)
+  /// Test: 0.70-0.75 để xem có ổn định hơn
+  static const double DEBUG_CONFIDENCE_THRESHOLD_OVERRIDE =
+      0.70; // Giảm xuống 70% để test ổn định
+
+  /// Log level cho inference:
+  /// 0 = Tối thiểu (chỉ error)
+  /// 1 = Bình thường (warning + info)
+  /// 2 = Chi tiết (tất cả + confidence từng crop)
+  /// 3 = Rất chi tiết (dump tất cả probabilities)
+  static const int INFERENCE_LOG_LEVEL = 2;
 }

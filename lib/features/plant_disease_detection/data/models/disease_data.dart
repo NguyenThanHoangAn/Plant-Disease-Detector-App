@@ -43,6 +43,15 @@ class DiseaseDataRepository {
     'tomato': BilingualText('Cà chua', 'Tomato'),
   };
 
+  /// Exact label aliases from labels.txt to deterministic disease keys.
+  /// This avoids collapsing distinct corn labels into the same generic disease name.
+  static const Map<String, String> _labelDiseaseKeyAliases = {
+    'corn___cercospora_leaf_spot gray_leaf_spot': 'cercospora_leaf_spot',
+    'corn___common_rust': 'rust',
+    'corn___northern_leaf_blight': 'blight',
+    'corn___healthy': 'healthy',
+  };
+
   static final Map<String, DiseaseInfo> _diseaseData = {
     'healthy': const DiseaseInfo(
       plantName: BilingualText('Cây', 'Plant'),
@@ -2190,6 +2199,12 @@ class DiseaseDataRepository {
 
   // Get disease info by label
   static DiseaseInfo? getInfo(String label) {
+    final exactKey = _normalizeExactLabel(label);
+    final aliasKey = _labelDiseaseKeyAliases[exactKey];
+    if (aliasKey != null) {
+      return _diseaseData[aliasKey];
+    }
+
     final key = _normalizeLabel(label);
     return _diseaseData[key];
   }
@@ -2373,6 +2388,13 @@ class DiseaseDataRepository {
     if (tokens.isEmpty) return null;
     final candidate = tokens.first.trim().toLowerCase();
     return candidate.isEmpty ? null : candidate;
+  }
+
+  static String _normalizeExactLabel(String label) {
+    return label
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'\s+'), ' ');
   }
 
   static String _extractDiseasePart(String label) {

@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_deep_learning_demo/core/l10n/app_localizations.dart';
-
-import 'package:flutter_deep_learning_demo/features/plant_disease_detection/presentation/viewmodels/inference_view_model.dart';
 import 'package:flutter_deep_learning_demo/features/plant_disease_detection/data/models/inference_result.dart';
 import 'package:flutter_deep_learning_demo/features/plant_disease_detection/data/models/verification_result.dart';
+import 'package:flutter_deep_learning_demo/features/plant_disease_detection/presentation/viewmodels/inference_view_model.dart';
+
 import '../widgets/common/language_switcher.dart';
 import 'camera_capture_page.dart';
 import 'camera_preview_page.dart';
@@ -50,14 +50,6 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
     if (state == AppLifecycleState.resumed) {}
   }
 
-  /// 📸 MỞ CAMERA TRONG APP (không out ra ngoài)
-  ///
-  /// Flow:
-  /// 1. Push CameraCapturePage → Hiển thị camera preview ngay trong app
-  /// 2. User chụp ảnh → Lưu file tạm
-  /// 3. User confirm → CameraCapturePage return File
-  /// 4. setState(_selectedImage) → Lưu ảnh & hiển thị preview
-  /// 5. Tự động gọi runInference() → Phân tích AI
   Future<void> _openInAppCamera() async {
     try {
       final file = await Navigator.of(context).push<File?>(
@@ -72,7 +64,7 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
         });
 
         await ref.read(inferenceProvider.notifier).runInference(file);
-      } else {}
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -85,17 +77,8 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
     }
   }
 
-  /// 📸 MỞ CAMERA/GALLERY NATIVE (có thể gây reload)
-  ///
-  /// Flow:
-  /// 1. Push CameraPreviewPage → User chụp/chọn ảnh
-  /// 2. User confirm ảnh → CameraPreviewPage return File
-  /// 3. setState(_selectedImage) → Lưu ảnh & hiển thị preview
-  /// 4. Tự động gọi runInference() → Phân tích AI
-  /// 5. UI auto-update khi inferenceState thay đổi
   Future<void> _openCameraPreview() async {
     try {
-      // 📸 Mở camera/gallery preview (không auto-open)
       final file = await Navigator.of(context).push<File?>(
         MaterialPageRoute(
           builder: (_) => const CameraPreviewPage(),
@@ -103,14 +86,12 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
       );
 
       if (file != null && mounted) {
-        // ✅ BƯỚC 1: Lưu ảnh vào state (để hiển thị preview)
         setState(() {
           _selectedImage = file;
         });
 
-        // ✅ BƯỚC 2: Tự động gọi inference (nếu state listener hoạt động)
         await ref.read(inferenceProvider.notifier).runInference(file);
-      } else {}
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -123,42 +104,61 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
     }
   }
 
-  /// 🚨 Hiển thị dialog lỗi verification
-  void _showVerificationErrorDialog(
-      BuildContext context, VerificationResult result, AppLocalizations l10n) {
+  Future<bool> _showVerificationQualityDialog(
+    BuildContext context,
+    VerificationResult result,
+    AppLocalizations l10n,
+  ) async {
     String title;
     String message;
     IconData icon;
     Color iconColor;
 
-    switch (result.error) {
-      case VerificationError.poorQuality:
-        title = l10n.poorImageQuality;
-        message = l10n.poorImageQualityDesc;
-        icon = Icons.blur_on;
-        iconColor = Colors.orange;
-        break;
-      case VerificationError.lowConfidence:
-        title = l10n.lowConfidence;
-        message = result.message ?? l10n.lowConfidenceDesc;
-        icon = Icons.error_outline;
-        iconColor = Colors.amber;
-        break;
-      case VerificationError.outOfScope:
-        title = l10n.imageOutOfScope;
-        message = result.message ?? l10n.imageOutOfScopeDesc;
-        icon = Icons.cancel;
-        iconColor = Colors.red;
-        break;
-      default:
-        title = l10n.verificationFailed;
-        message = result.message ?? l10n.errorOccurred;
-        icon = Icons.warning;
-        iconColor = Colors.red;
+    if (result.isPassed && result.isWarning) {
+      title = '${l10n.lowConfidence} (Cảnh báo)';
+      message = result.message ?? l10n.lowConfidenceDesc;
+      icon = Icons.warning_amber_rounded;
+      iconColor = Colors.amber;
+    } else if (result.isPassed) {
+      title = 'Đánh giá chất lượng ảnh';
+      message = 'Ảnh đã được kiểm tra chất lượng và phân tích thành công.';
+      icon = Icons.verified;
+      iconColor = Colors.green;
+    } else {
+      switch (result.error) {
+        case VerificationError.poorQuality:
+          title = l10n.poorImageQuality;
+          message = l10n.poorImageQualityDesc;
+          icon = Icons.blur_on;
+          iconColor = Colors.orange;
+          break;
+        case VerificationError.lowConfidence:
+          title = '${l10n.lowConfidence} (Cảnh báo)';
+          message = result.message ?? l10n.lowConfidenceDesc;
+          icon = Icons.warning_amber_rounded;
+          iconColor = Colors.amber;
+          break;
+        case VerificationError.outOfScope:
+          title = l10n.imageOutOfScope;
+          message = result.message ?? l10n.imageOutOfScopeDesc;
+          icon = Icons.cancel;
+          iconColor = Colors.red;
+          break;
+        default:
+          title = l10n.verificationFailed;
+          message = result.message ?? l10n.errorOccurred;
+          icon = Icons.warning;
+          iconColor = Colors.red;
+      }
     }
 
-    showDialog(
+    final qualityText = result.imageQualityScore != null
+        ? '${result.imageQualityScore!.toStringAsFixed(0)}/100'
+        : '--/100';
+
+    final shouldContinue = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
@@ -182,41 +182,43 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              message.replaceAll('\\n', '\n'), // Convert \\n to actual newline
+              message.replaceAll('\\n', '\n'),
               style: const TextStyle(fontSize: 14, height: 1.5),
             ),
-            if (result.imageQualityScore != null) ...[
-              const SizedBox(height: 16),
-              const Divider(),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.assessment, size: 20, color: Colors.grey),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${l10n.imageQualityScore}: ${result.imageQualityScore!.toStringAsFixed(0)}/100',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w500,
-                    ),
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.assessment, size: 20, color: Colors.grey),
+                const SizedBox(width: 8),
+                Text(
+                  '${l10n.imageQualityScore}: $qualityText',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Gợi ý: chụp đủ sáng, giữ máy chắc tay, lấy nét lá bệnh và nền đơn giản.',
+              style: TextStyle(fontSize: 13, color: Colors.grey),
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
-              // Reset state để user có thể thử lại
-              setState(() {
-                _selectedImage = null;
-              });
+              final allowContinue = result.isPassed && !result.isWarning;
+              Navigator.of(context).pop(allowContinue);
             },
             child: Text(
-              l10n.retryWithBetterImage,
+              result.isPassed && !result.isWarning
+                  ? 'Tiếp tục'
+                  : l10n.retryWithBetterImage,
               style: TextStyle(
                 color: Theme.of(context).primaryColor,
                 fontWeight: FontWeight.bold,
@@ -226,50 +228,58 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
         ],
       ),
     );
+
+    return shouldContinue ?? false;
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    super.build(context);
 
-    // 👁️ WATCH inference state để tự động cập nhật UI
     final inferenceState = ref.watch(inferenceProvider);
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    // 🎯 Nếu inference xong và có kết quả → Auto navigate hoặc hiển thị lỗi
     ref.listen(inferenceProvider, (previous, next) {
       next.when(
         data: (verificationResult) {
           if (verificationResult == null) return;
 
-          // ✅ PASS: Navigate sang ResultDetailPage
-          if (verificationResult.isPassed &&
-              verificationResult.predictions.isNotEmpty &&
-              mounted &&
-              _selectedImage != null) {
-            final top1 = verificationResult.predictions.first;
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            if (!mounted) return;
 
-            // 🔄 NAVIGATE sang ResultDetailPage
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        ResultDetailPage(result: top1, image: _selectedImage),
-                  ),
-                );
-              }
-            });
-          }
-          // ❌ FAIL: Hiển thị dialog lỗi verification
-          else if (!verificationResult.isPassed && mounted) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                _showVerificationErrorDialog(context, verificationResult, l10n);
-              }
-            });
-          }
+            final canNavigateDirectly =
+                verificationResult.isPassed && !verificationResult.isWarning;
+
+            bool shouldNavigate = canNavigateDirectly;
+
+            // Ảnh đạt chuẩn và pass hoàn toàn -> đi thẳng vào kết quả, không hiện popup.
+            if (!canNavigateDirectly) {
+              shouldNavigate = await _showVerificationQualityDialog(
+                context,
+                verificationResult,
+                l10n,
+              );
+              if (!mounted) return;
+            }
+
+            if (shouldNavigate &&
+                verificationResult.isPassed &&
+                verificationResult.predictions.isNotEmpty &&
+                _selectedImage != null) {
+              final top1 = verificationResult.predictions.first;
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      ResultDetailPage(result: top1, image: _selectedImage),
+                ),
+              );
+            } else {
+              setState(() {
+                _selectedImage = null;
+              });
+            }
+          });
         },
         loading: () {},
         error: (error, stackTrace) {
@@ -325,7 +335,7 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
               Container(
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(30),
                     topRight: Radius.circular(30),
                   ),
@@ -364,7 +374,6 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
     );
   }
 }
-
 class _Header extends StatelessWidget {
   const _Header({required this.theme});
 
@@ -1117,7 +1126,7 @@ class _HowItWorksCard extends StatelessWidget {
             index: 3,
             title: 'Disease Classification',
             description:
-                'Get instant results with disease name, confidence score, and guidance',
+              'Get instant results with disease name and guidance',
           ),
         ],
       ),
@@ -1484,8 +1493,8 @@ class _ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final confidence = result.confidence;
-    final isHighConfidence = confidence > 0.7;
+    final isHealthy = result.label.toLowerCase().contains('healthy');
+    final accentColor = isHealthy ? const Color(0xFF16A34A) : const Color(0xFFEA580C);
 
     return InkWell(
       onTap: onTap,
@@ -1512,19 +1521,14 @@ class _ResultCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: (isHighConfidence
-                            ? theme.colorScheme.error
-                            : theme.colorScheme.tertiary)
-                        .withValues(alpha: 0.1),
+                    color: accentColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    isHighConfidence
-                        ? Icons.warning_amber_rounded
-                        : Icons.check_circle_outline,
-                    color: isHighConfidence
-                        ? theme.colorScheme.error
-                        : theme.colorScheme.tertiary,
+                    isHealthy
+                        ? Icons.check_circle_outline
+                        : Icons.warning_amber_rounded,
+                    color: accentColor,
                     size: 24,
                   ),
                 ),
@@ -1540,32 +1544,29 @@ class _ResultCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Độ tin cậy: ${(confidence * 100).toStringAsFixed(1)}%',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: accentColor.withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          isHealthy ? 'Cây khỏe' : 'Có dấu hiệu bệnh',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: accentColor,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 16),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                value: confidence,
-                minHeight: 8,
-                backgroundColor: Colors.grey[200],
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  isHighConfidence
-                      ? theme.colorScheme.error
-                      : theme.colorScheme.primary,
-                ),
-              ),
             ),
           ],
         ),

@@ -15,6 +15,7 @@ class VerificationResult {
   final List<InferenceResult> predictions; // Kết quả dự đoán (có thể empty nếu failed)
   final double? imageQualityScore; // Điểm chất lượng ảnh (0-100)
   final String? message; // Message mô tả lỗi
+  final bool isWarning; // True nếu là cảnh báo nhưng vẫn cho phép hiển thị kết quả
 
   VerificationResult({
     required this.isPassed,
@@ -22,6 +23,7 @@ class VerificationResult {
     required this.predictions,
     this.imageQualityScore,
     this.message,
+    this.isWarning = false,
   });
 
   /// Constructor cho trường hợp pass
@@ -34,6 +36,24 @@ class VerificationResult {
       error: VerificationError.none,
       predictions: predictions,
       imageQualityScore: imageQualityScore,
+      isWarning: false,
+    );
+  }
+
+  /// Constructor cho trường hợp warning (vẫn pass nhưng cần cảnh báo người dùng)
+  factory VerificationResult.warning({
+    required List<InferenceResult> predictions,
+    VerificationError error = VerificationError.lowConfidence,
+    String? message,
+    double? imageQualityScore,
+  }) {
+    return VerificationResult(
+      isPassed: true,
+      error: error,
+      predictions: predictions,
+      imageQualityScore: imageQualityScore,
+      message: message,
+      isWarning: true,
     );
   }
 
@@ -49,6 +69,7 @@ class VerificationResult {
       predictions: [],
       imageQualityScore: imageQualityScore,
       message: message,
+      isWarning: false,
     );
   }
 

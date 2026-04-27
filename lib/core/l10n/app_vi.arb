@@ -285,6 +285,10 @@
   "version": "Phiên bản",
   "released": "Phát hành",
   "developedFor": "Phát triển cho nghiên cứu học thuật và tiến bộ công nghệ nông nghiệp",
+  "photoQualityAssessment": "Đánh giá chất lượng ảnh",
+  "photoQualityAssessmentPassedMessage": "Ảnh đã được kiểm tra chất lượng và phân tích thành công.",
+  "verificationCaptureTip": "Gợi ý: chụp đủ sáng, giữ máy chắc tay, lấy nét lá bệnh và nền đơn giản.",
+  "continueButton": "Tiếp tục",
   
   "importantDisclaimer": "Lưu ý quan trọng",
   "importantDisclaimerDesc": "Đây là kết quả được tạo bởi AI dựa trên phân tích thị giác máy tính. Để chẩn đoán chính xác và khuyến nghị điều trị, vui lòng tham khảo ý kiến các chuyên gia nông nghiệp, cán bộ khuyến nông hoặc chuyên gia bệnh thực vật được chứng nhận trong khu vực của bạn."

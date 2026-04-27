@@ -285,6 +285,10 @@
   "version": "Version",
   "released": "Released",
   "developedFor": "Developed for academic research and agricultural technology advancement",
+  "photoQualityAssessment": "Image Quality Assessment",
+  "photoQualityAssessmentPassedMessage": "The image passed quality checks and was analyzed successfully.",
+  "verificationCaptureTip": "Tip: ensure good lighting, hold the camera steady, focus on the diseased leaf, and keep a simple background.",
+  "continueButton": "Continue",
   
   "importantDisclaimer": "Important Disclaimer",
   "importantDisclaimerDesc": "This is an AI-generated result based on computer vision analysis. For accurate diagnosis and treatment recommendations, please consult with agricultural experts, extension officers, or certified plant pathologists in your area."

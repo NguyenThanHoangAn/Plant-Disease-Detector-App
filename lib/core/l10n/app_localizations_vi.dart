@@ -742,6 +742,20 @@ class AppLocalizationsVi extends AppLocalizations {
       'Phát triển cho nghiên cứu học thuật và tiến bộ công nghệ nông nghiệp';
 
   @override
+  String get photoQualityAssessment => 'Đánh giá chất lượng ảnh';
+
+  @override
+  String get photoQualityAssessmentPassedMessage =>
+      'Ảnh đã được kiểm tra chất lượng và phân tích thành công.';
+
+  @override
+  String get verificationCaptureTip =>
+      'Gợi ý: chụp đủ sáng, giữ máy chắc tay, lấy nét lá bệnh và nền đơn giản.';
+
+  @override
+  String get continueButton => 'Tiếp tục';
+
+  @override
   String get importantDisclaimer => 'Lưu ý quan trọng';
 
   @override

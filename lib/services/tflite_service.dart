@@ -340,7 +340,10 @@ class TFLiteService {
       if (topKAll.isNotEmpty) {
         final top1 = topKAll.first;
         if (top1.confidence >= threshold) {
-          return topKAll.take(k).toList();
+          return topKAll
+              .where((result) => result.confidence >= threshold)
+              .take(k)
+              .toList();
         } else {
           // Below threshold -> no confident prediction
           return [];
@@ -390,9 +393,12 @@ class TFLiteService {
 
     if (predictions.isEmpty) {
       print('❌ [Verification] Không có kết quả dự đoán');
+      final thresholdPct =
+          (AppConfig.CONFIDENCE_THRESHOLD * 100).toStringAsFixed(0);
       return VerificationResult.failed(
         error: VerificationError.outOfScope,
-        message: 'Không thể phân tích ảnh',
+        message:
+            'Độ tin cậy dưới ngưỡng ${thresholdPct}%. Vui lòng chụp lại gần hơn, đủ sáng và lấy nét rõ lá bệnh.',
         imageQualityScore: qualityResult.blurScore,
       );
     }
@@ -422,10 +428,8 @@ class TFLiteService {
       );
     }
 
-    // ✅ BƯỚC 3: Kiểm tra confidence threshold
-    // Use DEBUG override if set different from default
-    final confidenceThreshold =
-        AppConfig.DEBUG_CONFIDENCE_THRESHOLD_OVERRIDE;
+    // ✅ BƯỚC 3: Kiểm tra confidence threshold chung
+    final confidenceThreshold = AppConfig.CONFIDENCE_THRESHOLD;
 
     if (topResult.confidence < confidenceThreshold) {
       final confidencePct = (topResult.confidence * 100).toStringAsFixed(1);
@@ -442,47 +446,9 @@ class TFLiteService {
       );
     }
 
-    // ✅ BƯỚC 3B: Kiểm tra độ tách biệt giữa top-1 và top-2
+    // ✅ BƯỚC 3B: Kiểm tra độ tách biệt giữa top-1 và top-2 bằng ngưỡng gap chung
     if (predictions.length >= 2) {
       final gap = predictions[0].confidence - predictions[1].confidence;
-      final top1Plant = _extractPlantPrefix(predictions[0].label);
-      final top2Plant = _extractPlantPrefix(predictions[1].label);
-
-      // Cặp Tomato Early/Late Blight là cặp dễ nhầm nhất -> yêu cầu gap cao hơn bình thường.
-      if (_isTomatoBlightAmbiguousPair(
-              predictions[0].label, predictions[1].label) &&
-          gap < AppConfig.TOMATO_BLIGHT_AMBIGUITY_GAP) {
-        final gapPct = (gap * 100).toStringAsFixed(1);
-        final minGapPct =
-            (AppConfig.TOMATO_BLIGHT_AMBIGUITY_GAP * 100).toStringAsFixed(1);
-        print(
-            '⚠️  [Verification] Mơ hồ Tomato blight: gap=${gapPct}% (<${minGapPct}%)');
-        return VerificationResult.warning(
-          predictions: predictions,
-          error: VerificationError.lowConfidence,
-          message:
-              'Mô hình đang phân vân giữa mốc sớm và mốc muộn (${gapPct}%). Kết quả được hiển thị kèm cảnh báo, nên chụp cận vùng đốm bệnh để xác nhận.',
-          imageQualityScore: qualityResult.blurScore,
-        );
-      }
-
-      // Nếu top-1 và top-2 là 2 cây khác nhau mà điểm quá sát nhau thì coi là mơ hồ.
-      if (top1Plant != null &&
-          top2Plant != null &&
-          top1Plant != top2Plant &&
-          gap < AppConfig.CROSS_PLANT_AMBIGUITY_GAP) {
-        final gapPct = (gap * 100).toStringAsFixed(1);
-        print(
-            '⚠️  [Verification] Mơ hồ khác cây: $top1Plant vs $top2Plant, gap=${gapPct}%');
-        return VerificationResult.warning(
-          predictions: predictions,
-          error: VerificationError.lowConfidence,
-          message:
-              'Mô hình đang phân vân giữa 2 loại cây khác nhau (${gapPct}%). Kết quả được hiển thị kèm cảnh báo, nên chụp sát một lá duy nhất để xác nhận.',
-          imageQualityScore: qualityResult.blurScore,
-        );
-      }
-
       if (gap < AppConfig.MIN_TOP1_TOP2_GAP) {
         final gapPct = (gap * 100).toStringAsFixed(1);
         final minGapPct =
@@ -799,8 +765,12 @@ class TFLiteService {
         return InferenceResult(label: label, confidence: e.prob);
       }).toList();
 
-      if (topCandidates.isEmpty ||
-          topCandidates.first.confidence < AppConfig.CONFIDENCE_THRESHOLD) {
+      final filteredTopCandidates = topCandidates
+          .where((prediction) =>
+              prediction.confidence >= AppConfig.CONFIDENCE_THRESHOLD)
+          .toList();
+
+      if (filteredTopCandidates.isEmpty) {
         return _InferenceSnapshot(
           probabilities: probabilities,
           topPredictions: const [],
@@ -810,7 +780,7 @@ class TFLiteService {
       const resultCount = AppConfig.TOP_K <= 0 ? 1 : AppConfig.TOP_K;
       return _InferenceSnapshot(
         probabilities: probabilities,
-        topPredictions: topCandidates.take(resultCount).toList(),
+        topPredictions: filteredTopCandidates.take(resultCount).toList(),
       );
     } catch (e, st) {
       print('❌ Inference snapshot failed: $e\n$st');
@@ -1003,35 +973,6 @@ class TFLiteService {
       if (normalized.contains(keyword)) return true;
     }
     return false;
-  }
-
-  String? _extractPlantPrefix(String label) {
-    final normalized = label.trim();
-    if (normalized.isEmpty) return null;
-    if (!normalized.contains('___')) return null;
-
-    final plant = normalized.split('___').first.trim().toLowerCase();
-    return plant.isEmpty ? null : plant;
-  }
-
-  bool _isTomatoBlightAmbiguousPair(String labelA, String labelB) {
-    final a = labelA.toLowerCase();
-    final b = labelB.toLowerCase();
-
-    bool isTomatoLabel(String s) => s.startsWith('tomato___');
-    bool isEarlyBlight(String s) =>
-        s.contains('early blight') || s.contains('early_blight');
-    bool isLateBlight(String s) =>
-        s.contains('late blight') || s.contains('late_blight');
-
-    if (!isTomatoLabel(a) || !isTomatoLabel(b)) return false;
-
-    final aEarlyBLight = isEarlyBlight(a);
-    final aLateBlight = isLateBlight(a);
-    final bEarlyBlight = isEarlyBlight(b);
-    final bLateBlight = isLateBlight(b);
-
-    return (aEarlyBLight && bLateBlight) || (aLateBlight && bEarlyBlight);
   }
 
   List<double> _softmax(List<double> logits) {

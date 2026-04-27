@@ -1502,6 +1502,30 @@ abstract class AppLocalizations {
   /// **'Developed for academic research and agricultural technology advancement'**
   String get developedFor;
 
+  /// No description provided for @photoQualityAssessment.
+  ///
+  /// In en, this message translates to:
+  /// **'Image Quality Assessment'**
+  String get photoQualityAssessment;
+
+  /// No description provided for @photoQualityAssessmentPassedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The image passed quality checks and was analyzed successfully.'**
+  String get photoQualityAssessmentPassedMessage;
+
+  /// No description provided for @verificationCaptureTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: ensure good lighting, hold the camera steady, focus on the diseased leaf, and keep a simple background.'**
+  String get verificationCaptureTip;
+
+  /// No description provided for @continueButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueButton;
+
   /// No description provided for @importantDisclaimer.
   ///
   /// In en, this message translates to:

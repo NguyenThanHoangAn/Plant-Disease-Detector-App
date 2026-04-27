@@ -120,8 +120,8 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
       icon = Icons.blur_on;
       iconColor = Colors.orange;
     } else if (result.isPassed) {
-      title = 'Đánh giá chất lượng ảnh';
-      message = 'Ảnh đã được kiểm tra chất lượng và phân tích thành công.';
+      title = l10n.photoQualityAssessment;
+      message = l10n.photoQualityAssessmentPassedMessage;
       icon = Icons.verified;
       iconColor = Colors.green;
     } else {
@@ -152,10 +152,6 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
       }
     }
 
-    final qualityText = result.imageQualityScore != null
-        ? '${result.imageQualityScore!.toStringAsFixed(0)}/100'
-        : '--/100';
-
     final shouldContinue = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -185,27 +181,10 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
               message.replaceAll('\\n', '\n'),
               style: const TextStyle(fontSize: 14, height: 1.5),
             ),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.assessment, size: 20, color: Colors.grey),
-                const SizedBox(width: 8),
-                Text(
-                  '${l10n.imageQualityScore}: $qualityText',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 10),
-            const Text(
-              'Gợi ý: chụp đủ sáng, giữ máy chắc tay, lấy nét lá bệnh và nền đơn giản.',
-              style: TextStyle(fontSize: 13, color: Colors.grey),
+            Text(
+              l10n.verificationCaptureTip,
+              style: const TextStyle(fontSize: 13, color: Colors.grey),
             ),
           ],
         ),
@@ -217,7 +196,7 @@ class _DeepLearningHomePageState extends ConsumerState<DeepLearningHomePage>
             },
             child: Text(
               result.isPassed && !result.isWarning
-                  ? 'Tiếp tục'
+                  ? l10n.continueButton
                   : l10n.retryWithBetterImage,
               style: TextStyle(
                 color: Theme.of(context).primaryColor,

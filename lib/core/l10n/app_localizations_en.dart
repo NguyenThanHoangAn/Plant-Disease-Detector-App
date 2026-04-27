@@ -740,6 +740,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Developed for academic research and agricultural technology advancement';
 
   @override
+  String get photoQualityAssessment => 'Image Quality Assessment';
+
+  @override
+  String get photoQualityAssessmentPassedMessage =>
+      'The image passed quality checks and was analyzed successfully.';
+
+  @override
+  String get verificationCaptureTip =>
+      'Tip: ensure good lighting, hold the camera steady, focus on the diseased leaf, and keep a simple background.';
+
+  @override
+  String get continueButton => 'Continue';
+
+  @override
   String get importantDisclaimer => 'Important Disclaimer';
 
   @override

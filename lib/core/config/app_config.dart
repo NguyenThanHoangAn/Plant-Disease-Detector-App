@@ -23,19 +23,12 @@ class AppConfig {
 
   /// Post-processing: threshold for accepting prediction, and top-K to return
   static const double CONFIDENCE_THRESHOLD =
-      0.15; // Tránh trả về kết quả quá yếu ngay từ bước đầu
+      0.60; // Không trả về prediction dưới 60%
   static const int TOP_K = 3; // Hiển thị top 3 kết quả
 
-  /// Verification threshold: only ask user to retake if confidence is below this value
-  static const double LOW_CONFIDENCE_RETAKE_THRESHOLD = 0.7; // 70%
-
-  /// Extra verification thresholds to reduce false positives.
+  /// Gap tối thiểu giữa top-1 và top-2 để tránh dự đoán mơ hồ.
   static const double MIN_TOP1_TOP2_GAP =
       0.20; // top-1 should exceed top-2 by at least 20%
-  static const double CROSS_PLANT_AMBIGUITY_GAP =
-      0.28; // reject if top-1/top-2 are different plants and too close
-  static const double TOMATO_BLIGHT_AMBIGUITY_GAP =
-      0.32; // stricter guard for Tomato Early Blight vs Late Blight confusion
   static const double MIN_LEAF_COLOR_RATIO =
       0.10; // basic leaf-like color ratio
 
@@ -59,12 +52,6 @@ class AppConfig {
   /// true = chạy 3 crop, trung bình kết quả (ổn định hơn nhưng chậm)
   /// false = chỉ chạy 1 crop giữa (nhanh nhưng có thể mình bạc)
   static const bool ENABLE_MULTI_CROP = true;
-
-  /// Debug threshold: giảm xuống để test tính ổn định
-  /// Bình thường: 0.80 (80%)
-  /// Test: 0.70-0.75 để xem có ổn định hơn
-  static const double DEBUG_CONFIDENCE_THRESHOLD_OVERRIDE =
-      0.70; // Giảm xuống 70% để test ổn định
 
   /// Log level cho inference:
   /// 0 = Tối thiểu (chỉ error)

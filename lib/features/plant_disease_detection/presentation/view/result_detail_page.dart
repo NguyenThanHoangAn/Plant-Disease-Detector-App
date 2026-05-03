@@ -219,12 +219,16 @@ class ResultDetailPage extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF22C55E).withOpacity(0.1),
+                                color: isDiseased
+                                    ? theme.colorScheme.errorContainer
+                                    : theme.colorScheme.primaryContainer,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.spa,
-                                color: Color(0xFF22C55E),
+                                color: isDiseased
+                                    ? theme.colorScheme.onErrorContainer
+                                    : theme.colorScheme.onPrimaryContainer,
                                 size: 20,
                               ),
                             ),

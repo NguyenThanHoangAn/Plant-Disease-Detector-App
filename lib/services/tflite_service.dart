@@ -391,8 +391,33 @@ class TFLiteService {
     final inferenceSnapshot = await _runInferenceSnapshot(imageFile);
     final predictions = inferenceSnapshot.topPredictions;
 
+    // Nếu không có predictions do filtering bởi CONFIDENCE_THRESHOLD,
+    // lấy top1 từ probabilities thô để xác định xem đây là trường hợp
+    // low-confidence (hiển thị cảnh báo kiểu 'poor image quality') hay
+    // thực sự out-of-scope.
     if (predictions.isEmpty) {
-      print('❌ [Verification] Không có kết quả dự đoán');
+      print('⚠️ [Verification] Filtered predictions empty, kiểm tra top prob thô');
+      if (inferenceSnapshot.probabilities.isNotEmpty) {
+        final maxProb = inferenceSnapshot.probabilities.reduce(math.max);
+        final maxProbPct = (maxProb * 100).toStringAsFixed(1);
+        print('   🔍 Top raw probability = ${maxProbPct}%');
+
+        // Nếu độ tin cậy dưới 60% -> coi là low-confidence (warning)
+        const lowConfidenceDisplayThreshold = 0.60;
+        if (maxProb < lowConfidenceDisplayThreshold) {
+          final thresholdPct = (lowConfidenceDisplayThreshold * 100).toStringAsFixed(0);
+          return VerificationResult.warning(
+            predictions: const [],
+            error: VerificationError.lowConfidence,
+            message:
+                'Độ tin cậy dưới ngưỡng ${thresholdPct}%. Vui lòng chụp lại gần hơn, đủ sáng và lấy nét rõ lá bệnh.',
+            imageQualityScore: qualityResult.blurScore,
+          );
+        }
+      }
+
+      // Mặc định: coi là out-of-scope nếu không có bằng chứng low-confidence rõ ràng
+      print('❌ [Verification] Không có kết quả dự đoán - đánh dấu outOfScope');
       final thresholdPct =
           (AppConfig.CONFIDENCE_THRESHOLD * 100).toStringAsFixed(0);
       return VerificationResult.failed(
